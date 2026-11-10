@@ -1,0 +1,169 @@
+---
+import '../styles/global.css';
+import Logo from '../components/Logo.astro';
+import { ui, href, barePath, LANGS, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+  title: string;
+  description?: string;
+  image?: string;
+}
+const { lang, title, image } = Astro.props;
+const t = ui[lang];
+const description = Astro.props.description ?? t.siteDesc;
+const fullTitle = title.includes('mytemplate') ? title : `${title} · mytemplate.my`;
+const bare = barePath(Astro.url.pathname);
+const abs = (l: Lang) => new URL(href(l, bare), Astro.site);
+const nav = [
+  ['/images', t.nav.images],
+  ['/text', t.nav.text],
+  ['/skills', t.nav.skills],
+  ['/credits', t.nav.credits],
+];
+const isOn = (p: string) =>
+  bare.startsWith(p) ||
+  (p === '/images' && /^\/(category|prompt)\//.test(bare)) ||
+  (p === '/text' && bare.startsWith('/text-prompt'));
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={abs(lang)} />
+    {LANGS.map((l) => <link rel="alternate" hreflang={l} href={abs(l)} />)}
+    <link rel="alternate" hreflang="x-default" href={abs('en')} />
+    <meta property="og:site_name" content="mytemplate.my" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={abs(lang)} />
+    <meta property="og:locale" content={lang === 'ms' ? 'ms_MY' : 'en_US'} />
+    {image && <meta property="og:image" content={image} />}
+    <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+    <meta name="theme-color" content="#f3f0e8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <header class="sticky top-0 z-20 border-b border-ink bg-paper">
+      <div class="wrap flex h-14 items-center gap-4 sm:gap-6">
+        <a href={href(lang, '/')} aria-label={`mytemplate.my, ${t.home}`}><Logo /></a>
+        <nav class="hidden items-center gap-5 md:flex" aria-label={t.navLabel}>
+          {
+            nav.map(([p, label]) => (
+              <a
+                href={href(lang, p)}
+                aria-current={isOn(p) ? 'page' : undefined}
+                class:list={['text-sm font-semibold', isOn(p) ? 'bg-mark px-1.5' : 'text-muted transition-colors hover:text-ink']}
+              >
+                {label}
+              </a>
+            ))
+          }
+        </nav>
+        <form action={href(lang, '/search')} class="ml-auto hidden items-center sm:flex" role="search">
+          <input
+            type="search"
+            name="q"
+            placeholder={t.searchPrompts}
+            aria-label={t.searchPrompts}
+            class="h-9 w-44 border border-ink border-r-0 bg-surface px-3 text-sm outline-none placeholder:text-muted/70 focus:bg-white lg:w-56"
+          />
+          <button class="grid h-9 w-9 place-items-center border border-ink bg-ink text-paper transition-colors hover:bg-mark hover:text-ink" aria-label={t.search}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m20 20-4.5-4.5"></path></svg>
+          </button>
+        </form>
+        <div class="ml-auto flex border border-ink font-mono text-xs font-bold sm:ml-0" role="group" aria-label={t.langLabel}>
+          {
+            LANGS.map((l) => (
+              <a
+                href={href(l, bare)}
+                hreflang={l}
+                lang={l}
+                data-lang={l}
+                title={ui[l].langName}
+                aria-current={l === lang ? 'true' : undefined}
+                class:list={['px-2 py-1.5 transition-colors', l === lang ? 'bg-ink text-paper' : 'hover:bg-mark']}
+              >
+                {ui[l].langShort}
+              </a>
+            ))
+          }
+        </div>
+      </div>
+      <nav class="wrap flex items-center gap-5 overflow-x-auto border-t border-line py-2 md:hidden" aria-label={t.navLabel}>
+        {
+          nav.map(([p, label]) => (
+            <a href={href(lang, p)} class:list={['whitespace-nowrap text-sm font-semibold', isOn(p) ? 'bg-mark px-1.5' : 'text-muted']}>
+              {label}
+            </a>
+          ))
+        }
+        <a href={href(lang, '/search')} class:list={['whitespace-nowrap text-sm font-semibold sm:hidden', isOn('/search') ? 'bg-mark px-1.5' : 'text-muted']}>
+          {t.search}
+        </a>
+      </nav>
+    </header>
+
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="mt-24 bg-ink text-paper">
+      <div class="wrap grid gap-10 py-12 md:grid-cols-[1.4fr_1fr_1fr]">
+        <div>
+          <Logo invert size={30} />
+          <p class="mt-4 max-w-sm text-sm leading-relaxed text-paper/70">{t.footer.blurb}</p>
+        </div>
+        <div>
+          <p class="font-mono text-[11px] uppercase tracking-[0.14em] text-paper/50">{t.footer.collections}</p>
+          <ul class="mt-3 space-y-2 text-sm">
+            <li><a class="hover:text-mark" href={href(lang, '/images')}>{t.footer.imagePrompts}</a></li>
+            <li><a class="hover:text-mark" href={href(lang, '/text')}>{t.footer.textPrompts}</a></li>
+            <li><a class="hover:text-mark" href={href(lang, '/skills')}>{t.footer.agentSkills}</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="font-mono text-[11px] uppercase tracking-[0.14em] text-paper/50">{t.about}</p>
+          <ul class="mt-3 space-y-2 text-sm">
+            <li><a class="hover:text-mark" href={href(lang, '/credits')}>{t.footer.sources}</a></li>
+            <li><a class="hover:text-mark" href={href(lang, '/credits') + '#removal'}>{t.footer.takedown}</a></li>
+            <li>
+              {
+                LANGS.filter((l) => l !== lang).map((l) => (
+                  <a class="hover:text-mark" href={href(l, bare)} hreflang={l} lang={l} data-lang={l}>
+                    {ui[l].langName}
+                  </a>
+                ))
+              }
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="border-t border-paper/15">
+        <p class="wrap py-4 font-mono text-[11px] uppercase tracking-[0.14em] text-paper/50">{t.footer.strip}</p>
+      </div>
+    </footer>
+
+    <script is:inline>
+      // Remember an explicit language choice so the home page can honour it next visit.
+      document.querySelectorAll('a[data-lang]').forEach((a) =>
+        a.addEventListener('click', () => {
+          try {
+            localStorage.setItem('lang', a.dataset.lang);
+          } catch {}
+        }),
+      );
+    </script>
+  </body>
+</html>

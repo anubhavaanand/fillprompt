@@ -1,0 +1,122 @@
+@import 'tailwindcss';
+
+/*
+  Brand: mytemplate.my
+  Idea: a template is a blank waiting to be filled — [ ] with a highlighter mark.
+  Palette: paper, ink, one highlighter yellow. Vermilion only for tiny signals.
+  Shapes: square corners, ink rules, no soft shadows, no gradients.
+*/
+@theme {
+  --color-paper: #f3f0e8;
+  --color-surface: #fffdf7;
+  --color-ink: #151412;
+  --color-muted: #625d54;
+  --color-line: #d6d0c3;
+  --color-mark: #ffd83d;
+  --color-hot: #e0452b;
+  --font-display: 'Bricolage Grotesque', 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection {
+  background: var(--color-mark);
+  color: var(--color-ink);
+}
+:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+mark {
+  background: var(--color-mark);
+  color: inherit;
+  padding: 0 0.15em;
+}
+
+@layer components {
+  .wrap {
+    @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+  }
+  .display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 0.98;
+  }
+  /* small mono caption: section numbers, meta, tags */
+  .label {
+    @apply font-mono text-[11px] uppercase tracking-[0.14em] text-muted;
+  }
+  .btn {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 border border-ink bg-ink px-4 py-2.5 text-sm font-semibold text-paper transition-colors hover:bg-mark hover:text-ink;
+  }
+  .btn-line {
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 border border-ink px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-ink hover:text-paper;
+  }
+  .chip {
+    @apply inline-flex items-baseline gap-2 border border-line bg-surface px-3 py-1.5 text-sm transition-colors hover:border-ink hover:bg-mark;
+  }
+  .chip-on {
+    @apply border-ink bg-ink text-paper hover:bg-ink;
+  }
+  .chip .n {
+    @apply font-mono text-[11px] opacity-60;
+  }
+  .field {
+    @apply block w-full border border-ink bg-surface px-4 py-3 text-base text-ink outline-none placeholder:text-muted/70 focus:bg-white;
+  }
+  .link {
+    @apply underline decoration-ink/30 decoration-1 underline-offset-4 transition-colors hover:decoration-ink;
+  }
+  /* numbered section heading with a rule */
+  .sec {
+    @apply flex items-baseline gap-4 border-t border-ink pt-3;
+  }
+  .sec h2 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    @apply text-2xl sm:text-3xl;
+  }
+  .masonry {
+    @apply columns-2 gap-5 md:columns-3 lg:columns-4;
+  }
+  .masonry > * {
+    @apply mb-6 break-inside-avoid;
+  }
+  /* image tile: flat, with a highlighter block sliding out on hover */
+  .tile-img {
+    @apply relative block border border-ink/15 bg-line/50 transition-[transform,box-shadow] duration-150;
+  }
+  .tile:hover .tile-img {
+    transform: translate(-3px, -3px);
+    box-shadow: 6px 6px 0 var(--color-mark), 6px 6px 0 1px var(--color-ink);
+  }
+  /* ruled rows used for text prompts, categories and skills */
+  .row {
+    @apply block border-b border-line py-4 transition-colors hover:bg-mark/60;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

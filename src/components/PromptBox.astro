@@ -1,0 +1,100 @@
+---
+// Shows a prompt with a copy button. Placeholders such as [OBJECT] or
+// {argument name="x" default="y"} become input fields that fill the prompt live,
+// and stay highlighted in the text so the reader sees what is theirs to change.
+import { ui, type Lang } from '../i18n';
+interface Props {
+  prompt: string;
+  lang: Lang;
+}
+const { prompt, lang } = Astro.props;
+const t = ui[lang].box;
+const json = JSON.stringify(prompt).replace(/</g, '\\u003c');
+---
+
+<div class="prompt-box border border-ink bg-surface" data-copy={t.copy} data-copied={t.copied} data-failed={t.failed}>
+  <div class="flex items-center justify-between gap-3 bg-ink py-2 pl-4 pr-2 text-paper">
+    <span class="font-mono text-[11px] uppercase tracking-[0.14em]">{t.prompt}</span>
+    <button
+      type="button"
+      class="copy cursor-pointer bg-mark px-3 py-1.5 text-sm font-bold text-ink transition-colors hover:bg-paper"
+    >
+      {t.copy}
+    </button>
+  </div>
+  <div class="vars hidden border-b border-ink bg-mark/25 p-4">
+    <p class="label !text-ink">{t.fill}</p>
+    <div class="var-list mt-3 grid gap-3 sm:grid-cols-2"></div>
+  </div>
+  <pre class="out max-h-[34rem] overflow-auto whitespace-pre-wrap break-words p-4 font-mono text-[13px] leading-[1.7]">{prompt}</pre>
+  <script type="application/json" class="src" set:html={json} />
+</div>
+
+<script is:inline>
+  document.querySelectorAll('.prompt-box').forEach((box) => {
+    const raw = JSON.parse(box.querySelector('.src').textContent);
+    const out = box.querySelector('.out');
+    const ARG = /\{argument name="([^"]+)" default="([^"]*)"\}/g;
+    const BRACKET = /\[([A-Z][A-Z0-9 _/&-]{1,40})\]/g;
+    const vars = new Map(); // token -> {label, value, fallback}
+    for (const m of raw.matchAll(ARG)) {
+      if (!vars.has(m[0])) vars.set(m[0], { label: m[1].replace(/_/g, ' '), value: '', fallback: m[2] });
+    }
+    for (const m of raw.matchAll(BRACKET)) {
+      if (!vars.has(m[0])) vars.set(m[0], { label: m[1].toLowerCase(), value: '', fallback: m[0] });
+    }
+    const editable = vars.size > 0 && vars.size <= 12;
+    const render = () => {
+      if (!editable) return;
+      // Split the raw text on every token, keeping tokens, then mark the filled parts.
+      let parts = [raw];
+      for (const token of vars.keys()) {
+        parts = parts.flatMap((p) => {
+          if (typeof p !== 'string') return [p];
+          const bits = p.split(token);
+          return bits.flatMap((b, i) => (i ? [{ token }, b] : [b]));
+        });
+      }
+      out.replaceChildren(
+        ...parts.map((p) => {
+          if (typeof p === 'string') return document.createTextNode(p);
+          const v = vars.get(p.token);
+          const mark = document.createElement('mark');
+          mark.textContent = v.value.trim() || v.fallback;
+          return mark;
+        }),
+      );
+    };
+    if (editable) {
+      const list = box.querySelector('.var-list');
+      for (const v of vars.values()) {
+        const label = document.createElement('label');
+        label.className = 'block font-mono text-[11px] uppercase tracking-[0.1em] text-ink';
+        label.textContent = v.label;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.placeholder = v.fallback.replace(/^\[|\]$/g, '');
+        input.className =
+          'mt-1 block w-full border border-ink bg-surface px-3 py-2 font-sans text-sm normal-case tracking-normal text-ink outline-none focus:bg-white';
+        input.addEventListener('input', () => {
+          v.value = input.value;
+          render();
+        });
+        label.appendChild(input);
+        list.appendChild(label);
+      }
+      box.querySelector('.vars').classList.remove('hidden');
+    }
+    render();
+    const btn = box.querySelector('.copy');
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(out.textContent);
+        btn.textContent = box.dataset.copied;
+      } catch {
+        btn.textContent = box.dataset.failed;
+      }
+      setTimeout(() => (btn.textContent = box.dataset.copy), 1800);
+    });
+  });
+</script>

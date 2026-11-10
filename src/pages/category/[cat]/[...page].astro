@@ -1,0 +1,9 @@
+---
+// English (default) route. The page body lives in src/views/ImageList.astro.
+import View from '../../../views/ImageList.astro';
+import { categoryPaths } from '../../../lib/paths';
+
+export const getStaticPaths = ({ paginate }) => categoryPaths(paginate);
+---
+
+<View lang="en" page={Astro.props.page} cat={Astro.params.cat} />

@@ -1,0 +1,74 @@
+---
+import Base from '../layouts/Base.astro';
+import { sources, images, texts, skills } from '../lib/data';
+import { ui, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = ui[lang];
+const c = t.credits;
+const count = (key: string) => images.filter((p) => p.source === key).length;
+const rows: [string, string][] = [
+  ['jau123', c.usedImages(count('jau123'))],
+  ['youmind', c.usedImages(count('youmind'))],
+  ['zerolu', c.usedImages(count('zerolu'))],
+  ['promptschat', c.usedText(texts.length)],
+  ['anthropic', c.usedSkills(skills.length)],
+];
+---
+
+<Base lang={lang} title={c.title} description={c.metaDesc}>
+  <div class="wrap max-w-4xl pt-10">
+    <p class="label">{t.about}</p>
+    <h1 class="display mt-2 text-4xl sm:text-6xl">{c.title}</h1>
+    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-muted">{c.lead}</p>
+
+    <div class="mt-8 overflow-x-auto">
+      <table class="w-full border-t border-ink text-left text-sm">
+        <thead>
+          <tr class="border-b border-ink">
+            <th class="label py-2.5 pr-4 font-medium">{c.thCollection}</th>
+            <th class="label py-2.5 pr-4 font-medium">{c.thBy}</th>
+            <th class="label py-2.5 pr-4 font-medium">{c.thLicense}</th>
+            <th class="label py-2.5 font-medium">{c.thUsed}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            rows.map(([key, used]) => {
+              const s = sources[key];
+              return (
+                <tr class="border-b border-line">
+                  <td class="py-3 pr-4"><a href={s.url} target="_blank" rel="noopener noreferrer" class="link font-semibold">{s.name}</a></td>
+                  <td class="py-3 pr-4">{s.by}</td>
+                  <td class="py-3 pr-4">
+                    <a href={s.licenseUrl} target="_blank" rel="noopener noreferrer" class="link">{key === 'anthropic' ? c.perSkill : s.license}</a>
+                  </td>
+                  <td class="py-3 font-mono text-xs text-muted">{used}</td>
+                </tr>
+              );
+            })
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sec mt-14">
+      <span class="label">01</span>
+      <h2>{c.imagesTitle}</h2>
+    </div>
+    <p class="mt-3 max-w-2xl leading-relaxed text-muted">{c.imagesBody}</p>
+
+    <div id="removal" class="sec mt-12 scroll-mt-24">
+      <span class="label">02</span>
+      <h2>{c.takedownTitle}</h2>
+    </div>
+    <p class="mt-3 max-w-2xl leading-relaxed text-muted">
+      {c.takedownA}
+      <a href="mailto:hello@mytemplate.my" class="link font-semibold text-ink">hello@mytemplate.my</a>
+      {c.takedownB}
+    </p>
+  </div>
+</Base>

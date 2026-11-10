@@ -1,0 +1,197 @@
+---
+import Base from '../layouts/Base.astro';
+import ImageCard from '../components/ImageCard.astro';
+import { images, texts, skills, catSlugs, catCounts, excerpt, fmt, pad } from '../lib/data';
+import { ui, href, categoryLabels, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = ui[lang];
+const cat = categoryLabels[lang];
+
+const byLikes = [...images].sort((a, b) => b.likes - a.likes);
+const popular = byLikes.slice(0, 12);
+// One strong example from each of four everyday categories for the hero sheet.
+// Skip prompts about people: the hero should not show a real person's likeness.
+const heroCats = ['product-brand', 'food-drink', 'poster', 'infographic-ui'];
+const people = /\b(portrait|selfie|woman|women|man|men|girl|boy|face|faces|person|people|celebrit\w+|model|actor|actress|singer|rapper|player)\b/i;
+const hero = heroCats.map((c) => byLikes.find((p) => p.cats[0] === c && !people.test(p.prompt))).filter(Boolean);
+const curated = images.filter((p) => p.source !== 'jau123').slice(0, 8);
+const textPicks = texts.slice(0, 8);
+const skillPicks = skills.filter((s) => ['pdf', 'pptx', 'xlsx', 'docx', 'frontend-design', 'canvas-design'].includes(s.name));
+const words = t.hero.words;
+const stats: [number, string, string][] = [
+  [images.length, t.hero.statImages, '/images'],
+  [texts.length, t.hero.statText, '/text'],
+  [skills.length, t.hero.statSkills, '/skills'],
+];
+---
+
+<Base lang={lang} title={t.homeTitle}>
+  {
+    lang === 'en' && (
+      <script is:inline>
+        // A visitor who chose Malay before goes straight to the Malay home page.
+        try { if (localStorage.getItem('lang') === 'ms') location.replace('/ms'); } catch {}
+      </script>
+    )
+  }
+  <section class="border-b border-ink">
+    <div class="wrap grid gap-10 py-10 lg:grid-cols-[1.15fr_1fr] lg:gap-14 lg:py-16">
+      <div class="flex flex-col justify-center">
+        <p class="label">{t.hero.label}</p>
+        <h1 class="display mt-5 text-[clamp(2.6rem,7.2vw,5.6rem)]">
+          {t.hero.line1}
+          <span class="mt-1 block">
+            <mark id="rot" class="inline-block px-[0.12em]">{words[0]}</mark>
+          </span>
+          <span class="block">{t.hero.line3}</span>
+        </h1>
+        <p class="mt-6 max-w-xl text-lg leading-relaxed text-muted">{t.hero.lead(images.length + texts.length)}</p>
+        <form action={href(lang, '/search')} class="mt-8 flex max-w-xl" role="search">
+          <input type="search" name="q" placeholder={t.searchHint} aria-label={t.searchPrompts} class="field min-w-0 flex-1 border-r-0" />
+          <button class="btn px-6 text-base">{t.search}</button>
+        </form>
+        <dl class="mt-10 grid max-w-xl grid-cols-3 border-t border-ink">
+          {
+            stats.map(([n, label, path], i) => (
+              <a href={href(lang, path)} class:list={['group block py-4', i > 0 && 'border-l border-line pl-4']}>
+                <dd class="display text-3xl sm:text-4xl">
+                  <span class="group-hover:bg-mark">{fmt(n)}</span>
+                </dd>
+                <dt class="label mt-1">{label}</dt>
+              </a>
+            ))
+          }
+        </dl>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 self-center">
+        {
+          hero.map((p, i) => (
+            <a href={href(lang, `/prompt/${p.slug}`)} class="tile group relative block">
+              <span class="tile-img aspect-square overflow-hidden">
+                <img
+                  src={p.images[0]}
+                  alt={p.title}
+                  referrerpolicy="no-referrer"
+                  class="h-full w-full object-cover"
+                  onerror="this.style.visibility='hidden'"
+                />
+                <span class="absolute left-0 top-0 bg-ink px-2 py-1 font-mono text-[11px] text-paper">{pad(i + 1)}</span>
+                <span class="absolute inset-x-0 bottom-0 bg-paper/95 px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em]">
+                  {cat[p.cats[0]]}
+                </span>
+              </span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap pt-14">
+    <div class="sec">
+      <span class="label">01</span>
+      <h2>{t.secCategories}</h2>
+    </div>
+    <div class="mt-4 grid sm:grid-cols-2 sm:gap-x-10">
+      {
+        catSlugs.map((slug) => (
+          <a href={href(lang, `/category/${slug}`)} class="row flex items-baseline justify-between gap-4 px-1 !py-3.5">
+            <span class="font-display text-xl font-bold tracking-[-0.02em]">{cat[slug]}</span>
+            <span class="font-mono text-sm text-muted">{fmt(catCounts[slug])}</span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="wrap pt-16">
+    <div class="sec justify-between">
+      <div class="flex items-baseline gap-4">
+        <span class="label">02</span>
+        <h2>{t.secPopular}</h2>
+      </div>
+      <a href={href(lang, '/images')} class="link text-sm font-semibold">{t.allImages}</a>
+    </div>
+    <div class="masonry mt-6">
+      {popular.map((p, i) => <ImageCard p={p} lang={lang} eager={i < 4} />)}
+    </div>
+  </section>
+
+  <section class="wrap pt-12">
+    <div class="sec">
+      <span class="label">03</span>
+      <h2>{t.secCurated}</h2>
+    </div>
+    <div class="masonry mt-6">
+      {curated.map((p) => <ImageCard p={p} lang={lang} />)}
+    </div>
+  </section>
+
+  <section class="wrap pt-12">
+    <div class="sec justify-between">
+      <div class="flex items-baseline gap-4">
+        <span class="label">04</span>
+        <h2>{t.secText}</h2>
+      </div>
+      <a href={href(lang, '/text')} class="link text-sm font-semibold">{t.allText}</a>
+    </div>
+    <div class="mt-2 grid md:grid-cols-2 md:gap-x-10">
+      {
+        textPicks.map((x, i) => (
+          <a href={href(lang, `/text-prompt/${x.slug}`)} class="row grid grid-cols-[2.5rem_1fr] gap-x-2 px-1">
+            <span class="label pt-1">{pad(i + 1)}</span>
+            <span>
+              <span class="block font-semibold">{x.title}</span>
+              <span class="mt-1 line-clamp-2 block text-sm text-muted">{excerpt(x.prompt, 150)}</span>
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="wrap pt-16">
+    <div class="grid border border-ink bg-surface md:grid-cols-[1fr_1.2fr]">
+      <div class="border-b border-ink p-6 sm:p-8 md:border-b-0 md:border-r">
+        <span class="label">05</span>
+        <h2 class="display mt-3 text-3xl sm:text-4xl">{t.skillsTeaser.title}</h2>
+        <p class="mt-4 max-w-md leading-relaxed text-muted">{t.skillsTeaser.body}</p>
+        <a href={href(lang, '/skills')} class="btn mt-6">{t.skillsTeaser.cta(skills.length)}</a>
+      </div>
+      <ul class="font-mono text-sm">
+        {
+          skillPicks.map((s) => (
+            <li class="border-b border-line last:border-0">
+              <a href={href(lang, '/skills')} class="flex items-baseline justify-between gap-4 px-6 py-3 transition-colors hover:bg-mark/60 sm:px-8">
+                <span class="font-bold">{s.name}/</span>
+                <span class="text-[11px] uppercase tracking-[0.1em] text-muted">{t.skills.licenses[s.license]}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<script is:inline define:vars={{ words }}>
+  // Rotate the highlighted word in the headline: the blank being filled.
+  const el = document.getElementById('rot');
+  if (el && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    let i = 0;
+    el.style.transition = 'opacity .18s';
+    setInterval(() => {
+      el.style.opacity = '0';
+      setTimeout(() => {
+        i = (i + 1) % words.length;
+        el.textContent = words[i];
+        el.style.opacity = '1';
+      }, 180);
+    }, 2400);
+  }
+</script>

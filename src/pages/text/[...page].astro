@@ -1,0 +1,9 @@
+---
+// English (default) route. The page body lives in src/views/TextList.astro.
+import View from '../../views/TextList.astro';
+import { textListPaths } from '../../lib/paths';
+
+export const getStaticPaths = ({ paginate }) => textListPaths(paginate);
+---
+
+<View lang="en" page={Astro.props.page} />

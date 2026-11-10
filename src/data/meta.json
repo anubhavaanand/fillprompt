@@ -1,0 +1,51 @@
+{
+  "sources": {
+    "jau123": {
+      "name": "NanoBanana Trending Prompts",
+      "by": "MeiGen.ai",
+      "url": "https://github.com/jau123/nanobanana-trending-prompts",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    "youmind": {
+      "name": "Awesome Nano Banana Pro Prompts",
+      "by": "YouMind OpenLab",
+      "url": "https://github.com/YouMind-OpenLab/awesome-nano-banana-pro-prompts",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    "zerolu": {
+      "name": "Awesome Nano Banana Pro",
+      "by": "ZeroLu",
+      "url": "https://github.com/ZeroLu/awesome-nanobanana-pro",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/ZeroLu/awesome-nanobanana-pro/blob/main/LICENSE"
+    },
+    "promptschat": {
+      "name": "prompts.chat",
+      "by": "Fatih Kadir Akın & contributors",
+      "url": "https://github.com/f/prompts.chat",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "anthropic": {
+      "name": "Anthropic Skills",
+      "by": "Anthropic",
+      "url": "https://github.com/anthropics/skills",
+      "license": "Per-skill license",
+      "licenseUrl": "https://github.com/anthropics/skills"
+    }
+  },
+  "categories": [
+    "portrait-avatar",
+    "photography",
+    "product-brand",
+    "food-drink",
+    "poster",
+    "social-media",
+    "infographic-ui",
+    "illustration-3d",
+    "comic-anime",
+    "creative"
+  ]
+}

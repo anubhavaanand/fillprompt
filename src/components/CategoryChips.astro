@@ -1,0 +1,22 @@
+---
+import { catSlugs, catCounts, images, fmt } from '../lib/data';
+import { categoryLabels, href, ui, type Lang } from '../i18n';
+interface Props {
+  lang: Lang;
+  active?: string;
+}
+const { lang, active } = Astro.props;
+---
+
+<div class="flex flex-wrap gap-2">
+  <a href={href(lang, '/images')} class:list={['chip', !active && 'chip-on']}>
+    {ui[lang].all} <span class="n">{fmt(images.length)}</span>
+  </a>
+  {
+    catSlugs.map((slug) => (
+      <a href={href(lang, `/category/${slug}`)} class:list={['chip', active === slug && 'chip-on']}>
+        {categoryLabels[lang][slug]} <span class="n">{fmt(catCounts[slug])}</span>
+      </a>
+    ))
+  }
+</div>

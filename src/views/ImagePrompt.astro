@@ -1,0 +1,115 @@
+---
+import Base from '../layouts/Base.astro';
+import ImageCard from '../components/ImageCard.astro';
+import PromptBox from '../components/PromptBox.astro';
+import { sources, excerpt, fmt, type ImagePrompt } from '../lib/data';
+import { ui, href, categoryLabels, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+  p: ImagePrompt;
+  related: ImagePrompt[];
+}
+const { lang, p, related } = Astro.props;
+const t = ui[lang];
+const tp = t.prompt;
+const cat = categoryLabels[lang];
+const src = sources[p.source];
+---
+
+<Base lang={lang} title={tp.metaTitle(p.title, p.model)} description={p.desc || excerpt(p.prompt, 155)} image={p.images[0]}>
+  <div class="wrap pt-10">
+    <p class="label">
+      <a href={href(lang, '/images')} class="hover:text-ink">{t.images.title}</a> /
+      <a href={href(lang, `/category/${p.cats[0]}`)} class="hover:text-ink">{cat[p.cats[0]]}</a>
+    </p>
+    <h1 class="display mt-3 max-w-4xl text-3xl sm:text-5xl">{p.title}</h1>
+    <dl class="mt-5 flex flex-wrap gap-x-8 gap-y-2 border-y border-ink py-3 font-mono text-xs">
+      <div><dt class="inline text-muted">{tp.model} </dt><dd class="inline font-bold">{p.model}</dd></div>
+      <div>
+        <dt class="inline text-muted">{tp.category} </dt>
+        <dd class="inline font-bold">
+          {p.cats.map((c, i) => <>{i > 0 && ', '}<a href={href(lang, `/category/${c}`)} class="link">{cat[c]}</a></>)}
+        </dd>
+      </div>
+      {p.likes > 0 && <div><dt class="inline text-muted">{tp.likes} </dt><dd class="inline font-bold">{fmt(p.likes)}</dd></div>}
+      {p.date && <div><dt class="inline text-muted">{tp.date} </dt><dd class="inline font-bold">{p.date}</dd></div>}
+    </dl>
+
+    <div class="mt-8 grid gap-8 lg:grid-cols-[1fr_1.05fr] lg:gap-12">
+      <div class="space-y-4">
+        {
+          p.images.slice(0, 4).map((img, i) => (
+            <a href={img} target="_blank" rel="noopener noreferrer" class="block border border-ink/15 bg-line/50">
+              <img
+                src={img}
+                alt={`${p.title}, ${tp.example(i + 1)}`}
+                loading={i ? 'lazy' : 'eager'}
+                referrerpolicy="no-referrer"
+                class="block w-full"
+                onerror="this.closest('a').style.display='none'"
+              />
+            </a>
+          ))
+        }
+      </div>
+
+      <div class="space-y-6 lg:sticky lg:top-20 lg:self-start">
+        {p.desc && <p class="text-lg leading-relaxed text-muted">{p.desc}</p>}
+        <PromptBox prompt={p.prompt} lang={lang} />
+
+        <div class="border-t border-ink pt-3 text-sm">
+          <p class="label">{tp.credits}</p>
+          <dl class="mt-2 space-y-1.5">
+            {
+              p.author && (
+                <div class="grid grid-cols-[7.5rem_1fr]">
+                  <dt class="text-muted">{tp.author}</dt>
+                  <dd>
+                    {p.authorUrl ? (
+                      <a href={p.authorUrl} target="_blank" rel="noopener noreferrer nofollow" class="link font-semibold">{p.author}</a>
+                    ) : (
+                      p.author
+                    )}
+                  </dd>
+                </div>
+              )
+            }
+            {
+              p.sourceUrl && (
+                <div class="grid grid-cols-[7.5rem_1fr]">
+                  <dt class="text-muted">{tp.post}</dt>
+                  <dd><a href={p.sourceUrl} target="_blank" rel="noopener noreferrer nofollow" class="link font-semibold">{tp.viewSource}</a></dd>
+                </div>
+              )
+            }
+            <div class="grid grid-cols-[7.5rem_1fr]">
+              <dt class="text-muted">{tp.collection}</dt>
+              <dd>
+                <a href={src.url} target="_blank" rel="noopener noreferrer" class="link font-semibold">{src.name}</a>
+                {tp.by} {src.by} (<a href={src.licenseUrl} target="_blank" rel="noopener noreferrer" class="link">{src.license}</a>)
+              </dd>
+            </div>
+          </dl>
+          <p class="mt-3 text-xs text-muted">
+            {tp.imageNote} <a href={href(lang, '/credits') + '#removal'} class="link">{tp.takedown}</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {
+      related.length > 0 && (
+        <section class="pt-16">
+          <div class="sec">
+            <span class="label">{t.more}</span>
+            <h2>{tp.sameCategory}</h2>
+          </div>
+          <div class="masonry mt-6">
+            {related.map((r) => <ImageCard p={r} lang={lang} />)}
+          </div>
+        </section>
+      )
+    }
+  </div>
+</Base>

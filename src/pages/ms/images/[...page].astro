@@ -1,0 +1,9 @@
+---
+// Malay route. The page body lives in src/views/ImageList.astro.
+import View from '../../../views/ImageList.astro';
+import { imageListPaths } from '../../../lib/paths';
+
+export const getStaticPaths = ({ paginate }) => imageListPaths(paginate);
+---
+
+<View lang="ms" page={Astro.props.page} />

@@ -1,0 +1,34 @@
+---
+import { pad } from '../lib/data';
+import { ui, type Lang } from '../i18n';
+interface Props {
+  lang: Lang;
+  page: { currentPage: number; lastPage: number; url: { prev?: string; next?: string } };
+}
+const { page, lang } = Astro.props;
+const t = ui[lang];
+---
+
+{
+  page.lastPage > 1 && (
+    <nav class="mt-12 flex items-center justify-between border-t border-ink pt-4" aria-label={t.pagination}>
+      {page.url.prev ? (
+        <a class="btn-line" href={page.url.prev} rel="prev">
+          {t.prev}
+        </a>
+      ) : (
+        <span class="btn-line pointer-events-none opacity-30">{t.prev}</span>
+      )}
+      <span class="font-mono text-sm">
+        {pad(page.currentPage)} <span class="text-muted">/ {pad(page.lastPage)}</span>
+      </span>
+      {page.url.next ? (
+        <a class="btn" href={page.url.next} rel="next">
+          {t.next}
+        </a>
+      ) : (
+        <span class="btn-line pointer-events-none opacity-30">{t.next}</span>
+      )}
+    </nav>
+  )
+}

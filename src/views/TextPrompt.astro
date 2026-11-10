@@ -1,0 +1,58 @@
+---
+import Base from '../layouts/Base.astro';
+import PromptBox from '../components/PromptBox.astro';
+import { sources, excerpt, type TextPrompt } from '../lib/data';
+import { ui, href, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+  t: TextPrompt;
+  more: TextPrompt[];
+}
+const { lang, t: x, more } = Astro.props;
+const t = ui[lang];
+const src = sources.promptschat;
+---
+
+<Base lang={lang} title={t.text.detailMeta(x.title)} description={excerpt(x.prompt, 155)}>
+  <div class="wrap max-w-4xl pt-10">
+    <p class="label">
+      <a href={href(lang, '/text')} class="hover:text-ink">{t.text.title}</a> / {t.text.types[x.type] ?? x.type}{x.forDevs && ` / ${t.text.dev}`}
+    </p>
+    <h1 class="display mt-3 text-3xl sm:text-5xl">{x.title}</h1>
+
+    <div class="mt-8"><PromptBox prompt={x.prompt} lang={lang} /></div>
+
+    <p class="mt-4 text-sm text-muted">
+      {
+        x.contributor && (
+          <>
+            {t.text.contributor}{' '}
+            <a href={`https://github.com/${x.contributor}`} target="_blank" rel="noopener noreferrer nofollow" class="link font-semibold text-ink">
+              @{x.contributor}
+            </a>
+            {' · '}
+          </>
+        )
+      }
+      {t.text.collection} <a href={src.url} target="_blank" rel="noopener noreferrer" class="link font-semibold text-ink">{src.name}</a>
+      (<a href={src.licenseUrl} target="_blank" rel="noopener noreferrer" class="link">{src.license}</a>)
+    </p>
+
+    <section class="pt-16">
+      <div class="sec">
+        <span class="label">{t.more}</span>
+        <h2>{t.text.others}</h2>
+      </div>
+      <div class="mt-2 grid sm:grid-cols-2 sm:gap-x-10">
+        {
+          more.map((m) => (
+            <a href={href(lang, `/text-prompt/${m.slug}`)} class="row px-1 !py-3 font-semibold">
+              {m.title}
+            </a>
+          ))
+        }
+      </div>
+    </section>
+  </div>
+</Base>

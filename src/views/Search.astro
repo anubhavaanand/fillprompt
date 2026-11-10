@@ -1,0 +1,119 @@
+---
+import Base from '../layouts/Base.astro';
+import { ui, href, categoryLabels, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = ui[lang];
+const s = t.searchPage;
+// Everything the client script needs, in the page's language.
+const cfg = {
+  cats: categoryLabels[lang],
+  imageBase: href(lang, '/prompt/'),
+  textBase: href(lang, '/text-prompt/'),
+  loadFailed: s.loadFailed,
+  start: s.start,
+  none: s.none,
+};
+---
+
+<Base lang={lang} title={s.title} description={s.metaDesc}>
+  <div class="wrap pt-10">
+    <p class="label">{s.label}</p>
+    <h1 class="display mt-2 text-4xl sm:text-6xl">{s.title}</h1>
+    <input id="q" type="search" autofocus placeholder={t.searchHint} aria-label={t.searchPrompts} class="field mt-6 max-w-2xl text-lg" />
+    <p class="mt-2 text-sm text-muted">{s.hint}</p>
+    <p id="status" class="mt-6 font-mono text-sm text-muted">{s.loading}</p>
+
+    <section id="sec-i" class="hidden pt-6">
+      <div class="sec">
+        <span id="n-i" class="label"></span>
+        <h2>{s.images}</h2>
+      </div>
+      <div id="res-i" class="masonry mt-6"></div>
+    </section>
+    <section id="sec-t" class="hidden pt-10">
+      <div class="sec">
+        <span id="n-t" class="label"></span>
+        <h2>{s.text}</h2>
+      </div>
+      <div id="res-t" class="mt-2 grid sm:grid-cols-2 sm:gap-x-10"></div>
+    </section>
+  </div>
+</Base>
+
+<script is:inline define:vars={{ cfg }}>
+  (async () => {
+    const $ = (id) => document.getElementById(id);
+    const input = $('q');
+    const MAX = 48;
+    let idx;
+    try {
+      idx = await (await fetch('/search-index.json')).json();
+    } catch {
+      $('status').textContent = cfg.loadFailed;
+      return;
+    }
+    const el = (tag, cls, text) => {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    };
+    const imageCard = ([title, slug, cat, img]) => {
+      const a = el('a', 'tile group block');
+      a.href = cfg.imageBase + slug;
+      const frame = el('span', 'tile-img');
+      const im = el('img', 'block min-h-20 w-full');
+      im.src = img;
+      im.alt = title;
+      im.loading = 'lazy';
+      im.referrerPolicy = 'no-referrer';
+      im.onerror = () => (a.style.display = 'none');
+      frame.append(im);
+      const cap = el('span', 'mt-2.5 block');
+      cap.append(
+        el('span', 'line-clamp-2 block text-[15px] font-semibold leading-snug', title),
+        el('span', 'label mt-1 block', cfg.cats[cat] || cat),
+      );
+      a.append(frame, cap);
+      return a;
+    };
+    const textCard = ([title, slug]) => {
+      const a = el('a', 'row px-1 !py-3 font-semibold', title);
+      a.href = cfg.textBase + slug;
+      return a;
+    };
+    const run = () => {
+      const q = input.value.trim().toLowerCase();
+      const words = q.split(/\s+/).filter(Boolean);
+      history.replaceState(null, '', q ? '?q=' + encodeURIComponent(q) : location.pathname);
+      if (!words.length) {
+        $('status').textContent = cfg.start;
+        $('sec-i').classList.add('hidden');
+        $('sec-t').classList.add('hidden');
+        return;
+      }
+      const hit = (s) => words.every((w) => s.includes(w));
+      const im = idx.i.filter((r) => hit((r[0] + ' ' + (cfg.cats[r[2]] || '') + ' ' + r[4]).toLowerCase()));
+      const tx = idx.t.filter((r) => hit(r[0].toLowerCase()));
+      $('status').textContent = im.length + tx.length ? '' : cfg.none + ' "' + input.value.trim() + '".';
+      const show = (key, list, card) => {
+        $('sec-' + key).classList.toggle('hidden', !list.length);
+        $('n-' + key).textContent = list.length > MAX ? `${MAX} / ${list.length}` : String(list.length);
+        $('res-' + key).replaceChildren(...list.slice(0, MAX).map(card));
+      };
+      show('i', im, imageCard);
+      show('t', tx, textCard);
+    };
+    input.value = new URLSearchParams(location.search).get('q') || '';
+    let timer;
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(run, 150);
+    });
+    run();
+  })();
+</script>
