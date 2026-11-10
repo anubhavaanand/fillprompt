@@ -1,9 +1,14 @@
+# dependencies and build output
 node_modules/
 dist/
 .astro/
-.vercel/
-sources/
-.env
 
-.vercel
+# downloaded source collections (rebuilt by `npm run import:fresh`)
+sources/
+
+# local environment and tooling
 .env*
+.vercel/
+.claude/
+.DS_Store
+Thumbs.db

@@ -1,18 +1,32 @@
 {
   "name": "mytemplate.my",
-  "type": "module",
   "version": "0.1.0",
+  "description": "A free library of ready-to-copy AI prompts for images, video and text, plus agent skills.",
+  "homepage": "https://mytemplate.my",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/haritel97/mytemplate.my.git"
+  },
   "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
     "import": "node scripts/import.mjs",
-    "import:fresh": "node scripts/import.mjs --fetch"
+    "import:fresh": "node scripts/import.mjs --fetch",
+    "brand": "node scripts/og.mjs"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.5",
     "astro": "^7.4.8",
     "tailwindcss": "^4.3.5"
+  },
+  "devDependencies": {
+    "qrcode": "^1.5.4",
+    "sharp": "^0.35.5"
   }
 }
