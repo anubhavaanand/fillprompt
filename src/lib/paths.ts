@@ -1,5 +1,5 @@
 // getStaticPaths helpers shared by the English (root) and Malay (/ms) route files.
-import { images, texts, videos, catSlugs, videoModels, TEXT_FILTERS, inTextFilter, textFilterCounts } from './data';
+import { images, texts, videos, catSlugs, videoModels, textModels, TEXT_FILTERS, inTextFilter, textFilterCounts } from './data';
 
 export const IMAGE_PAGE = 48;
 export const TEXT_PAGE = 60;
@@ -52,8 +52,26 @@ export const textTypePaths = (paginate: any) =>
     ),
   );
 
+export const textModelPaths = (paginate: any) =>
+  textModels.flatMap((m) =>
+    paginate(
+      texts.filter((t) => t.model === m.label),
+      { params: { model: m.slug }, pageSize: TEXT_PAGE },
+    ),
+  );
+
+/** Six other prompts for the same AI model, starting after this one. */
+const moreLike = (t: (typeof texts)[number], i: number) => {
+  const out = [];
+  for (let d = 1; d < texts.length && out.length < 6; d++) {
+    const x = texts[(i + d) % texts.length];
+    if (x.model === t.model) out.push(x);
+  }
+  return out;
+};
+
 export const textPromptPaths = () =>
   texts.map((t, i) => ({
     params: { slug: t.slug },
-    props: { t, more: [1, 2, 3, 4, 5, 6].map((d) => texts[(i + d) % texts.length]) },
+    props: { t, more: moreLike(t, i) },
   }));

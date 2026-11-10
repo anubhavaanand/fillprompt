@@ -40,9 +40,17 @@ export interface TextPrompt {
   slug: string;
   title: string;
   prompt: string;
-  type: string; // 'text' | 'structured' | 'image'
+  type: string; // 'text' | 'structured' | 'image' | 'agent'
   forDevs: boolean;
-  contributor: string;
+  /** One-line summary, when the source gives one. */
+  desc: string;
+  /** The AI the prompt was written for: 'ChatGPT' | 'Claude' | 'Gemini' | 'Any model'. */
+  model: string;
+  /** Key into `sources`. */
+  source: string;
+  author: string;
+  authorUrl: string;
+  sourceUrl: string;
 }
 export interface Skill {
   name: string;
@@ -88,8 +96,13 @@ export const videoModels = Object.entries(
   .map(([label, count]) => ({ slug: slugOf(label), label, count }))
   .sort((a, b) => b.count - a.count);
 
+/** AI models that have text prompts, in a fixed order: used for the model filter. */
+export const textModels = ['ChatGPT', 'Claude', 'Gemini', 'Any model']
+  .map((label) => ({ slug: slugOf(label), label, count: texts.filter((t) => t.model === label).length }))
+  .filter((m) => m.count);
+
 /** Text prompt filters: the three prompt types, plus prompts flagged for developers. */
-export const TEXT_FILTERS = ['text', 'structured', 'image', 'developer'] as const;
+export const TEXT_FILTERS = ['text', 'structured', 'image', 'agent', 'developer'] as const;
 export const inTextFilter = (t: TextPrompt, f: string) => (f === 'developer' ? t.forDevs : t.type === f);
 export const textFilterCounts: Record<string, number> = Object.fromEntries(
   TEXT_FILTERS.map((f) => [f, texts.filter((t) => inTextFilter(t, f)).length]),

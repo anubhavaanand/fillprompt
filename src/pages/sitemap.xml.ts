@@ -1,4 +1,4 @@
-import { images, texts, videos, catSlugs, catCounts, videoModels, TEXT_FILTERS, textFilterCounts } from '../lib/data';
+import { images, texts, videos, catSlugs, catCounts, videoModels, textModels, TEXT_FILTERS, textFilterCounts } from '../lib/data';
 import { IMAGE_PAGE, TEXT_PAGE, VIDEO_PAGE } from '../lib/paths';
 import { LANGS } from '../i18n';
 import { url, BUILD_DATE } from '../lib/seo';
@@ -16,6 +16,7 @@ export function GET() {
     ...paged('/videos', videos.length, VIDEO_PAGE),
     ...videoModels.flatMap((m) => paged(`/video-model/${m.slug}`, m.count, VIDEO_PAGE)),
     ...paged('/text', texts.length, TEXT_PAGE),
+    ...textModels.flatMap((m) => paged(`/text-model/${m.slug}`, m.count, TEXT_PAGE)),
     ...TEXT_FILTERS.filter((f) => textFilterCounts[f]).flatMap((f) => paged(`/text-type/${f}`, textFilterCounts[f], TEXT_PAGE)),
     '/skills',
     '/credits',

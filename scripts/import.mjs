@@ -24,6 +24,7 @@ const FILES = {
   'youmind-seedance-videos.json': `${RAW}/YouMind-OpenLab/awesome-seedance-2-prompts/main/video-urls.json`,
   'osw-seedance.json': `${RAW}/opensource-works/awesome-seedance-prompts/main/data/posts.json`,
   'osw-mirror.json': `${RAW}/opensource-works/awesome-seedance-prompts/main/data/mirror.json`,
+  'youmind-gemini3.md': `${RAW}/YouMind-OpenLab/awesome-gemini-3-prompts/main/README.md`,
   'youmind-grok.md': `${RAW}/YouMind-OpenLab/awesome-grok-imagine-prompts/main/README.md`,
   'youmind-grok-videos.json': `${RAW}/YouMind-OpenLab/awesome-grok-imagine-prompts/main/video-urls.json`,
 };
@@ -138,6 +139,55 @@ export const SOURCES = {
     url: 'https://github.com/f/prompts.chat',
     license: 'CC0 1.0',
     licenseUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
+  },
+  voltagent: {
+    name: 'Awesome Claude Code Subagents',
+    by: 'VoltAgent',
+    url: 'https://github.com/VoltAgent/awesome-claude-code-subagents',
+    license: 'MIT',
+    licenseUrl: 'https://github.com/VoltAgent/awesome-claude-code-subagents/blob/main/LICENSE',
+  },
+  wshobson: {
+    name: 'Claude Code Agents',
+    by: 'Seth Hobson',
+    url: 'https://github.com/wshobson/agents',
+    license: 'MIT',
+    licenseUrl: 'https://github.com/wshobson/agents/blob/main/LICENSE',
+  },
+  geminisubagents: {
+    name: 'Awesome Gemini CLI Subagents',
+    by: 'Joseph Hampton',
+    url: 'https://github.com/JosephHampton/awesome-gemini-cli-subagents',
+    license: 'CC0 1.0',
+    licenseUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
+  },
+  youmindgemini: {
+    name: 'Awesome Gemini 3 Prompts',
+    by: 'YouMind OpenLab',
+    url: 'https://github.com/YouMind-OpenLab/awesome-gemini-3-prompts',
+    license: 'CC BY 4.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+  },
+  mustvlad: {
+    name: 'ChatGPT System Prompts',
+    by: 'mustvlad',
+    url: 'https://github.com/mustvlad/ChatGPT-System-Prompts',
+    license: 'MIT',
+    licenseUrl: 'https://github.com/mustvlad/ChatGPT-System-Prompts/blob/main/LICENSE',
+  },
+  fabric: {
+    name: 'Fabric patterns',
+    by: 'Daniel Miessler',
+    url: 'https://github.com/danielmiessler/Fabric',
+    license: 'MIT',
+    licenseUrl: 'https://github.com/danielmiessler/Fabric/blob/main/LICENSE',
+  },
+  llmpromptlibrary: {
+    name: 'LLM Prompt Library',
+    by: 'abilzerian',
+    url: 'https://github.com/abilzerian/LLM-Prompt-Library',
+    license: 'MIT',
+    licenseUrl: 'https://github.com/abilzerian/LLM-Prompt-Library/blob/main/LICENSE',
   },
   anthropic: {
     name: 'Anthropic Skills',
@@ -514,7 +564,12 @@ function importPromptsChat(csv) {
     prompt: r.prompt.trim(),
     type: (r.type || 'TEXT').toLowerCase(),
     forDevs: r.for_devs === 'TRUE',
-    contributor: r.contributor.trim(),
+    desc: '',
+    model: 'ChatGPT',
+    source: 'promptschat',
+    author: r.contributor.trim() ? `@${r.contributor.trim()}` : '',
+    authorUrl: r.contributor.trim() ? `https://github.com/${r.contributor.trim()}` : '',
+    sourceUrl: '',
   }));
 }
 
@@ -544,6 +599,245 @@ async function importSkills() {
   return out;
 }
 
+// ---------- Text prompt collections kept as shallow git clones under sources/ ----------
+// name -> [repository, sparse path (only that folder is checked out) or null]
+const TEXT_REPOS = {
+  'repo-VoltAgent_awesome-claude-code-subagents': ['VoltAgent/awesome-claude-code-subagents', null],
+  'repo-wshobson_agents': ['wshobson/agents', null],
+  'repo-JosephHampton_awesome-gemini-cli-subagents': ['JosephHampton/awesome-gemini-cli-subagents', null],
+  'repo-mustvlad_ChatGPT-System-Prompts': ['mustvlad/ChatGPT-System-Prompts', null],
+  'repo-abilzerian_LLM-Prompt-Library': ['abilzerian/LLM-Prompt-Library', null],
+  'repo-fabric': ['danielmiessler/Fabric', 'data/patterns'],
+};
+
+async function fetchTextRepos() {
+  for (const [dir, [repo, sparse]] of Object.entries(TEXT_REPOS)) {
+    const dest = path.join(SRC, dir);
+    if (await exists(dest)) {
+      if (FETCH) execFileSync('git', ['-C', dest, 'pull', '-q', '--depth', '1']);
+      continue;
+    }
+    const url = `https://github.com/${repo}.git`;
+    if (sparse) {
+      execFileSync('git', ['clone', '--depth', '1', '-q', '--filter=blob:none', '--sparse', url, dest]);
+      execFileSync('git', ['-C', dest, 'sparse-checkout', 'set', sparse]);
+    } else {
+      execFileSync('git', ['clone', '--depth', '1', '-q', url, dest]);
+    }
+    console.log('cloned', repo);
+  }
+}
+
+/** Every .md file under a folder, as paths relative to it with forward slashes. */
+async function walkMd(dir, rel = '') {
+  const out = [];
+  for (const e of await readdir(path.join(dir, rel), { withFileTypes: true })) {
+    if (e.name.startsWith('.')) continue;
+    const p = rel ? `${rel}/${e.name}` : e.name;
+    if (e.isDirectory()) out.push(...(await walkMd(dir, p)));
+    else if (e.name.endsWith('.md')) out.push(p);
+  }
+  return out.sort();
+}
+
+/** Split a markdown file into its YAML front matter (name and description only) and body. */
+function frontMatter(raw) {
+  const md = raw.replace(/\r\n/g, '\n');
+  const m = md.match(/^---\n([\s\S]*?)\n---\n?/);
+  if (!m) return { data: {}, body: md.trim() };
+  const pick = (key) => {
+    const v = m[1].match(new RegExp(`^${key}:\\s*(?:[>|][-+]?\\s*\\n((?:[ \\t]+.*\\n?)+)|(.*))$`, 'm'));
+    return (v?.[1] || v?.[2] || '').replace(/\s+/g, ' ').replace(/^["']|["']$/g, '').trim();
+  };
+  return { data: { name: pick('name'), description: pick('description') }, body: md.slice(m[0].length).trim() };
+}
+
+const ACRONYMS = {
+  api: 'API', ui: 'UI', ux: 'UX', sql: 'SQL', ml: 'ML', ai: 'AI', seo: 'SEO', ios: 'iOS', php: 'PHP', css: 'CSS', html: 'HTML',
+  cli: 'CLI', sre: 'SRE', qa: 'QA', llm: 'LLM', mcp: 'MCP', tdd: 'TDD', aws: 'AWS', gcp: 'GCP', hr: 'HR', pr: 'PR', ci: 'CI',
+  cd: 'CD', json: 'JSON', yaml: 'YAML', graphql: 'GraphQL', devops: 'DevOps', mlops: 'MLOps', javascript: 'JavaScript',
+  typescript: 'TypeScript', nextjs: 'Next.js', dotnet: '.NET', csharp: 'C#', cpp: 'C++', iot: 'IoT', rag: 'RAG', cto: 'CTO',
+  nlp: 'NLP', kpi: 'KPI', saas: 'SaaS', b2b: 'B2B', osint: 'OSINT', pdf: 'PDF', dx: 'DX', wcag: 'WCAG', k8s: 'Kubernetes',
+};
+/** "api-designer" or "analyze_bill_short" -> "API Designer", "Analyze Bill Short". */
+const humanize = (name) =>
+  name
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((w) => ACRONYMS[w.toLowerCase()] || w[0].toUpperCase() + w.slice(1))
+    .join(' ');
+
+const textEntry = (x) => ({ type: 'text', forDevs: false, desc: '', author: '', authorUrl: '', sourceUrl: '', ...x });
+
+/** Agent and command prompts stored as markdown files with front matter (Claude Code, Gemini CLI). */
+async function importAgentFiles({ repoDir, match, kind, model, source, repo, suffix = '' }) {
+  const root = path.join(SRC, repoDir);
+  const out = [];
+  for (const rel of await walkMd(root)) {
+    if (!match.test(rel) || /(^|\/)README\.md$/i.test(rel)) continue;
+    const { data, body } = frontMatter(await readFile(path.join(root, rel), 'utf8'));
+    const name = data.name || rel.split('/').pop().replace(/\.md$/, '');
+    if (body.length < 200) continue;
+    out.push(
+      textEntry({
+        title: `${humanize(name)} ${kind}${suffix}`,
+        desc: data.description,
+        prompt: body,
+        type: 'agent',
+        forDevs: true,
+        model,
+        source,
+        sourceUrl: `https://github.com/${repo}/blob/main/${rel.split('/').map(encodeURIComponent).join('/')}`,
+      }),
+    );
+  }
+  return out;
+}
+
+async function importMustvlad() {
+  const root = path.join(SRC, 'repo-mustvlad_ChatGPT-System-Prompts');
+  const out = [];
+  for (const rel of await walkMd(root, 'prompts')) {
+    const md = (await readFile(path.join(root, rel), 'utf8')).replace(/\r\n/g, '\n');
+    const title = (md.match(/^# (.+)$/m) || [])[1]?.trim();
+    const prompt = (md.match(/^## System Message\s*\n+([\s\S]*?)(?=\n## |$)/m) || [])[1]?.trim();
+    if (!title || !prompt) continue;
+    out.push(
+      textEntry({
+        title,
+        prompt,
+        model: 'ChatGPT',
+        source: 'mustvlad',
+        forDevs: /\/programming\//.test(rel),
+        sourceUrl: `https://github.com/mustvlad/ChatGPT-System-Prompts/blob/main/${rel}`,
+      }),
+    );
+  }
+  return out;
+}
+
+async function importLlmPromptLibrary() {
+  const root = path.join(SRC, 'repo-abilzerian_LLM-Prompt-Library');
+  const out = [];
+  for (const rel of await walkMd(root, 'prompts')) {
+    const md = (await readFile(path.join(root, rel), 'utf8')).replace(/\r\n/g, '\n');
+    const title = (md.match(/^# (.+)$/m) || [])[1]?.trim() || humanize(rel.split('/').pop().replace(/\.md$/, ''));
+    // The prompt is the first fenced block; files without one are the prompt themselves.
+    const prompt = ((md.match(/```[^\n]*\n([\s\S]*?)\n```/) || [])[1] || md.replace(/^# .+\n/, '')).trim();
+    out.push(
+      textEntry({
+        title,
+        prompt,
+        model: 'Any model',
+        source: 'llmpromptlibrary',
+        forDevs: /\/programming\//.test(rel),
+        sourceUrl: `https://github.com/abilzerian/LLM-Prompt-Library/blob/main/${rel.split('/').map(encodeURIComponent).join('/')}`,
+      }),
+    );
+  }
+  return out;
+}
+
+async function importFabric() {
+  const root = path.join(SRC, 'repo-fabric', 'data', 'patterns');
+  // One-line summaries: "12. **pattern_name**: What it does."
+  const notes = {};
+  const explain = path.join(root, 'pattern_explanations.md');
+  if (await exists(explain)) {
+    for (const m of (await readFile(explain, 'utf8')).matchAll(/^\d+\.\s+\*\*([a-z0-9_]+)\*\*:\s*(.+)$/gm)) notes[m[1]] = m[2].trim();
+  }
+  const out = [];
+  for (const e of (await readdir(root, { withFileTypes: true })).sort((a, b) => a.name.localeCompare(b.name))) {
+    const file = path.join(root, e.name, 'system.md');
+    if (!e.isDirectory() || !(await exists(file))) continue;
+    out.push(
+      textEntry({
+        title: humanize(e.name),
+        desc: notes[e.name] || '',
+        prompt: (await readFile(file, 'utf8')).replace(/\r\n/g, '\n').trim(),
+        model: 'Any model',
+        source: 'fabric',
+        forDevs: /code|git|commit|pull_request|api|sql|regex|script|coding|software/.test(e.name),
+        sourceUrl: `https://github.com/danielmiessler/Fabric/tree/main/data/patterns/${e.name}`,
+      }),
+    );
+  }
+  return out;
+}
+
+/** Gemini 3 prompts: same README layout as the other YouMind collections. */
+function importYoumindGemini(md) {
+  const seen = new Set();
+  return importYoumind(md)
+    .filter((x) => x.prompt && !seen.has(x.sourceUrl || x.title) && seen.add(x.sourceUrl || x.title))
+    .map((x) =>
+      textEntry({
+        title: x.title,
+        desc: x.desc,
+        prompt: x.prompt,
+        model: 'Gemini',
+        source: 'youmindgemini',
+        forDevs: /\b(html|css|javascript|three\.js|react|next\.js|svg|code|app|page|website)\b/i.test(`${x.title} ${x.prompt.slice(0, 400)}`),
+        author: x.author,
+        authorUrl: x.authorUrl,
+        sourceUrl: x.sourceUrl,
+      }),
+    );
+}
+
+async function importAllTexts() {
+  const chat = importPromptsChat(await read('promptschat.csv'));
+  const added = [
+    ...(await importAgentFiles({
+      repoDir: 'repo-VoltAgent_awesome-claude-code-subagents',
+      match: /^categories\/.+\.md$/,
+      kind: 'agent',
+      model: 'Claude',
+      source: 'voltagent',
+      repo: 'VoltAgent/awesome-claude-code-subagents',
+    })),
+    ...(await importAgentFiles({
+      repoDir: 'repo-wshobson_agents',
+      match: /^plugins\/[^/]+\/agents\/.+\.md$/,
+      kind: 'agent',
+      model: 'Claude',
+      source: 'wshobson',
+      repo: 'wshobson/agents',
+    })),
+    ...(await importAgentFiles({
+      repoDir: 'repo-wshobson_agents',
+      match: /^plugins\/[^/]+\/commands\/.+\.md$/,
+      kind: 'command',
+      model: 'Claude',
+      source: 'wshobson',
+      repo: 'wshobson/agents',
+    })),
+    ...(await importAgentFiles({
+      repoDir: 'repo-JosephHampton_awesome-gemini-cli-subagents',
+      match: /^agents\/.+\.md$/,
+      kind: 'agent',
+      model: 'Gemini',
+      source: 'geminisubagents',
+      suffix: ' (Gemini CLI)',
+      repo: 'JosephHampton/awesome-gemini-cli-subagents',
+    })),
+    ...importYoumindGemini(await read('youmind-gemini3.md')),
+    ...(await importMustvlad()),
+    ...(await importFabric()),
+    ...(await importLlmPromptLibrary()),
+  ];
+  return { chat, added };
+}
+
+/** Round-robin across AI models so a list page shows a mix instead of one collection at a time. */
+function weaveByModel(list) {
+  const order = ['ChatGPT', 'Claude', 'Gemini', 'Any model'];
+  const groups = order.map((m) => list.filter((x) => x.model === m));
+  const out = [];
+  for (let i = 0; out.length < list.length; i++) for (const g of groups) if (g[i]) out.push(g[i]);
+  return out;
+}
+
 function finalize(list, makeSlug) {
   const seen = new Set();
   return list.map((x) => {
@@ -556,6 +850,7 @@ function finalize(list, makeSlug) {
 }
 
 await fetchSources();
+await fetchTextRepos();
 await mkdir(OUT, { recursive: true });
 const read = (f) => readFile(path.join(SRC, f), 'utf8');
 
@@ -591,10 +886,25 @@ const numberRepeats = (list) => {
 };
 numberRepeats(images);
 
-let texts = importPromptsChat(await read('promptschat.csv')).filter(
-  (x) => x.title && x.prompt.length >= 20 && !BLOCK.test(x.title) && !BLOCK.test(x.prompt.slice(0, 3000)),
-);
-texts = numberRepeats(finalize(texts, (x) => slugify(x.title) || 'prompt'));
+// Text prompts. prompts.chat goes first so its slugs stay what they were before the other
+// collections were added; the list is woven by AI model afterwards, for display only.
+const { chat, added } = await importAllTexts();
+const textOk = (x) =>
+  x.title && x.model && x.prompt.length >= 20 && english(x.prompt) && !BLOCK.test(x.title) && !BLOCK.test(x.prompt.slice(0, 3000));
+const seenText = new Set();
+// prompts.chat keeps exactly the rules it had before, so none of its pages disappear.
+const chatOk = (x) => x.title && x.prompt.length >= 20 && !BLOCK.test(x.title) && !BLOCK.test(x.prompt.slice(0, 3000));
+let texts = [
+  ...chat.filter(chatOk),
+  ...added.filter(textOk).filter((x) => {
+    // The same agent often ships in more than one collection: keep the first copy of an identical prompt.
+    const key = x.prompt.replace(/\s+/g, ' ').slice(0, 400);
+    if (seenText.has(key)) return false;
+    seenText.add(key);
+    return true;
+  }),
+];
+texts = weaveByModel(numberRepeats(finalize(texts, (x) => slugify(x.title) || 'prompt')));
 
 // Video prompts: the evidence-led collection first (it carries the playable clip), most engaged first.
 let videos = [
@@ -639,7 +949,7 @@ await writeFile(path.join(OUT, 'meta.json'), JSON.stringify({ sources: SOURCES, 
 const by = (k) => images.reduce((a, x) => ((a[x[k]] = (a[x[k]] || 0) + 1), a), {});
 console.log(`image prompts: ${images.length} of ${counts.raw} raw`, by('source'));
 console.log('categories:', images.reduce((a, x) => (x.cats.forEach((c) => (a[c] = (a[c] || 0) + 1)), a), {}));
-console.log(`text prompts: ${texts.length}`);
+console.log(`text prompts: ${texts.length}`, texts.reduce((a, x) => ((a[`${x.model} / ${x.source}`] = (a[`${x.model} / ${x.source}`] || 0) + 1), a), {}));
 console.log(`video prompts: ${videos.length} of ${rawVideos} raw`, videos.reduce((a, x) => ((a[x.source] = (a[x.source] || 0) + 1), a), {}), 'with clip:', videos.filter((x) => x.video).length);
 console.log(`community skills: ${community.length}`, community.map((s) => `${s.by}/${s.name}=${s.license}`).join(', '));
 console.log(`skills: ${skills.length}`, skills.map((s) => `${s.name}=${s.license}`).join(', '));

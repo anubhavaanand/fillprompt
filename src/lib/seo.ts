@@ -44,14 +44,15 @@ export const textPromptSchema = (lang: Lang, x: TextPrompt, src: Source) => ({
   '@context': CTX,
   '@type': 'CreativeWork',
   name: x.title,
-  description: excerpt(x.prompt, 200),
+  description: x.desc || excerpt(x.prompt, 200),
   genre: 'AI text prompt',
-  keywords: 'ChatGPT prompt, Claude prompt, Gemini prompt',
+  keywords: x.model === 'Any model' ? 'ChatGPT prompt, Claude prompt, Gemini prompt' : `${x.model} prompt, AI text prompt`,
   url: url(lang, `/text-prompt/${x.slug}`),
   text: excerpt(x.prompt, 600),
   inLanguage: 'en',
   isAccessibleForFree: true,
-  author: person(x.contributor && `@${x.contributor}`, x.contributor && `https://github.com/${x.contributor}`),
+  author: person(x.author, x.authorUrl),
+  isBasedOn: x.sourceUrl || undefined,
   license: src.licenseUrl,
 });
 

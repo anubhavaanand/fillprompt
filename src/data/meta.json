@@ -70,6 +70,55 @@
       "license": "CC0 1.0",
       "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
     },
+    "voltagent": {
+      "name": "Awesome Claude Code Subagents",
+      "by": "VoltAgent",
+      "url": "https://github.com/VoltAgent/awesome-claude-code-subagents",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/VoltAgent/awesome-claude-code-subagents/blob/main/LICENSE"
+    },
+    "wshobson": {
+      "name": "Claude Code Agents",
+      "by": "Seth Hobson",
+      "url": "https://github.com/wshobson/agents",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/wshobson/agents/blob/main/LICENSE"
+    },
+    "geminisubagents": {
+      "name": "Awesome Gemini CLI Subagents",
+      "by": "Joseph Hampton",
+      "url": "https://github.com/JosephHampton/awesome-gemini-cli-subagents",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "youmindgemini": {
+      "name": "Awesome Gemini 3 Prompts",
+      "by": "YouMind OpenLab",
+      "url": "https://github.com/YouMind-OpenLab/awesome-gemini-3-prompts",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    "mustvlad": {
+      "name": "ChatGPT System Prompts",
+      "by": "mustvlad",
+      "url": "https://github.com/mustvlad/ChatGPT-System-Prompts",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/mustvlad/ChatGPT-System-Prompts/blob/main/LICENSE"
+    },
+    "fabric": {
+      "name": "Fabric patterns",
+      "by": "Daniel Miessler",
+      "url": "https://github.com/danielmiessler/Fabric",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/danielmiessler/Fabric/blob/main/LICENSE"
+    },
+    "llmpromptlibrary": {
+      "name": "LLM Prompt Library",
+      "by": "abilzerian",
+      "url": "https://github.com/abilzerian/LLM-Prompt-Library",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/abilzerian/LLM-Prompt-Library/blob/main/LICENSE"
+    },
     "anthropic": {
       "name": "Anthropic Skills",
       "by": "Anthropic",

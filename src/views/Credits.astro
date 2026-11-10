@@ -20,7 +20,9 @@ const rows: [string, string][] = [
   ['youmindseedance', c.usedVideos(videos.filter((v) => v.source === 'youmindseedance').length)],
   ['oswseedance', c.usedVideos(videos.filter((v) => v.source === 'oswseedance').length)],
   ['youmindgrok', c.usedVideos(videos.filter((v) => v.source === 'youmindgrok').length)],
-  ['promptschat', c.usedText(texts.length)],
+  ...['promptschat', 'mustvlad', 'voltagent', 'wshobson', 'geminisubagents', 'youmindgemini', 'fabric', 'llmpromptlibrary'].map(
+    (k) => [k, c.usedText(texts.filter((x) => x.source === k).length)] as [string, string],
+  ),
   ['anthropic', c.usedSkills(skills.length)],
 ];
 ---

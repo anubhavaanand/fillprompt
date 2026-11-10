@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import PromptBox from '../components/PromptBox.astro';
-import { sources, excerpt, type TextPrompt } from '../lib/data';
+import { sources, textModels, excerpt, type TextPrompt } from '../lib/data';
 import { ui, href, type Lang } from '../i18n';
 import { clip, textPromptSchema } from '../lib/seo';
 
@@ -12,44 +12,83 @@ interface Props {
 }
 const { lang, t: x, more } = Astro.props;
 const t = ui[lang];
-const src = sources.promptschat;
+const tt = t.text;
+const tp = t.prompt;
+const src = sources[x.source];
+const modelSlug = textModels.find((m) => m.label === x.model)?.slug;
+const typeLabel = tt.types[x.type] ?? x.type;
 ---
 
 <Base
   lang={lang}
-  title={t.text.detailMeta(clip(x.title, 52))}
-  description={excerpt(x.prompt, 155)}
-  crumbs={[[t.text.title, '/text'], [x.title, `/text-prompt/${x.slug}`]]}
+  title={tt.detailMeta(clip(x.title, 52))}
+  description={x.desc ? excerpt(x.desc, 155) : excerpt(x.prompt, 155)}
+  crumbs={[[tt.title, '/text'], [x.title, `/text-prompt/${x.slug}`]]}
   schema={[textPromptSchema(lang, x, src)]}
 >
   <div class="wrap max-w-4xl pt-10">
     <p class="label">
-      <a href={href(lang, '/text')} class="hover:text-ink">{t.text.title}</a> / {t.text.types[x.type] ?? x.type}{x.forDevs && ` / ${t.text.dev}`}
+      <a href={href(lang, '/text')} class="hover:text-ink">{tt.title}</a> /
+      {modelSlug ? <a href={href(lang, `/text-model/${modelSlug}`)} class="hover:text-ink">{x.model}</a> : x.model}
     </p>
     <h1 class="display mt-3 text-3xl sm:text-5xl">{x.title}</h1>
+    <dl class="mt-5 flex flex-wrap gap-x-8 gap-y-2 border-y border-ink py-3 font-mono text-xs">
+      <div>
+        <dt class="inline text-muted">{tt.model} </dt>
+        <dd class="inline font-bold">
+          {modelSlug ? <a href={href(lang, `/text-model/${modelSlug}`)} class="link">{x.model}</a> : x.model}
+        </dd>
+      </div>
+      <div>
+        <dt class="inline text-muted">{tt.byType} </dt>
+        <dd class="inline font-bold">
+          <a href={href(lang, `/text-type/${x.type}`)} class="link">{typeLabel}</a>{x.forDevs && x.type !== 'agent' && `, ${tt.dev}`}
+        </dd>
+      </div>
+    </dl>
+    {x.desc && <p class="mt-6 max-w-3xl text-lg leading-relaxed text-muted">{x.desc}</p>}
 
     <div class="mt-8"><PromptBox prompt={x.prompt} lang={lang} id={`t:${x.slug}`} /></div>
 
-    <p class="mt-4 text-sm text-muted">
-      {
-        x.contributor && (
-          <>
-            {t.text.contributor}{' '}
-            <a href={`https://github.com/${x.contributor}`} target="_blank" rel="noopener noreferrer nofollow" class="link font-semibold text-ink">
-              @{x.contributor}
-            </a>
-            {' · '}
-          </>
-        )
-      }
-      {t.text.collection} <a href={src.url} target="_blank" rel="noopener noreferrer" class="link font-semibold text-ink">{src.name}</a>
-      (<a href={src.licenseUrl} target="_blank" rel="noopener noreferrer" class="link">{src.license}</a>)
-    </p>
+    <div class="mt-6 border-t border-ink pt-3 text-sm">
+      <p class="label">{tp.credits}</p>
+      <dl class="mt-2 space-y-1.5">
+        {
+          x.author && (
+            <div class="grid grid-cols-[7.5rem_1fr]">
+              <dt class="text-muted">{tt.contributor}</dt>
+              <dd>
+                {x.authorUrl ? (
+                  <a href={x.authorUrl} target="_blank" rel="noopener noreferrer nofollow" class="link font-semibold">{x.author}</a>
+                ) : (
+                  x.author
+                )}
+              </dd>
+            </div>
+          )
+        }
+        <div class="grid grid-cols-[7.5rem_1fr]">
+          <dt class="text-muted">{tt.collection}</dt>
+          <dd>
+            <a href={src.url} target="_blank" rel="noopener noreferrer" class="link font-semibold">{src.name}</a>
+            {tp.by} {src.by} (<a href={src.licenseUrl} target="_blank" rel="noopener noreferrer" class="link">{src.license}</a>)
+          </dd>
+        </div>
+        {
+          x.sourceUrl && (
+            <div class="grid grid-cols-[7.5rem_1fr]">
+              <dt class="text-muted">{tp.post}</dt>
+              <dd><a href={x.sourceUrl} target="_blank" rel="noopener noreferrer nofollow" class="link font-semibold">{tt.viewSource}</a></dd>
+            </div>
+          )
+        }
+      </dl>
+    </div>
 
     <section class="pt-16">
       <div class="sec">
         <span class="label">{t.more}</span>
-        <h2>{t.text.others}</h2>
+        <h2>{tt.others}</h2>
       </div>
       <div class="mt-2 grid sm:grid-cols-2 sm:gap-x-10">
         {

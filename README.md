@@ -64,7 +64,14 @@ Defined in `scripts/import.mjs` (`SOURCES`) and listed on the site's Credits pag
 | [opensource-works/awesome-seedance-prompts](https://github.com/opensource-works/awesome-seedance-prompts) | MIT | video prompts |
 | [YouMind-OpenLab/awesome-seedance-2-prompts](https://github.com/YouMind-OpenLab/awesome-seedance-2-prompts) | CC BY 4.0 | video prompts |
 | [YouMind-OpenLab/awesome-grok-imagine-prompts](https://github.com/YouMind-OpenLab/awesome-grok-imagine-prompts) | CC BY 4.0 | video prompts |
-| [f/prompts.chat](https://github.com/f/prompts.chat) | CC0 1.0 (prompts) | text prompts |
+| [f/prompts.chat](https://github.com/f/prompts.chat) | CC0 1.0 (prompts) | text prompts (ChatGPT) |
+| [mustvlad/ChatGPT-System-Prompts](https://github.com/mustvlad/ChatGPT-System-Prompts) | MIT | text prompts (ChatGPT) |
+| [VoltAgent/awesome-claude-code-subagents](https://github.com/VoltAgent/awesome-claude-code-subagents) | MIT | agent prompts (Claude) |
+| [wshobson/agents](https://github.com/wshobson/agents) | MIT | agent and command prompts (Claude) |
+| [JosephHampton/awesome-gemini-cli-subagents](https://github.com/JosephHampton/awesome-gemini-cli-subagents) | CC0 1.0 | agent prompts (Gemini) |
+| [YouMind-OpenLab/awesome-gemini-3-prompts](https://github.com/YouMind-OpenLab/awesome-gemini-3-prompts) | CC BY 4.0 | text prompts (Gemini) |
+| [danielmiessler/Fabric](https://github.com/danielmiessler/Fabric) | MIT | text prompts (any model) |
+| [abilzerian/LLM-Prompt-Library](https://github.com/abilzerian/LLM-Prompt-Library) | MIT | text prompts (any model) |
 | [anthropics/skills](https://github.com/anthropics/skills) | per skill | links only |
 
 The Skills page also links to community skill repositories; only their names, descriptions and licenses are shown.
