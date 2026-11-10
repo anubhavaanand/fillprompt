@@ -1,0 +1,9 @@
+---
+// English (default) route. The page body lives in src/views/VideoList.astro.
+import View from '../../views/VideoList.astro';
+import { videoListPaths } from '../../lib/paths';
+
+export const getStaticPaths = ({ paginate }) => videoListPaths(paginate);
+---
+
+<View lang="en" page={Astro.props.page} />

@@ -1,0 +1,125 @@
+---
+import Base from '../layouts/Base.astro';
+import VideoCard from '../components/VideoCard.astro';
+import PromptBox from '../components/PromptBox.astro';
+import { sources, excerpt, fmt, type VideoPrompt } from '../lib/data';
+import { ui, href, type Lang } from '../i18n';
+import { clip, videoPromptSchema } from '../lib/seo';
+
+interface Props {
+  lang: Lang;
+  v: VideoPrompt;
+  related: VideoPrompt[];
+}
+const { lang, v, related } = Astro.props;
+const t = ui[lang];
+const tp = t.prompt;
+const tv = t.videos;
+const src = sources[v.source];
+---
+
+<Base
+  lang={lang}
+  title={tv.detailMeta(clip(v.title, 52), v.model)}
+  description={v.desc ? excerpt(v.desc, 155) : excerpt(v.prompt, 155)}
+  image={v.poster || undefined}
+  crumbs={[[tv.title, '/videos'], [v.title, `/video/${v.slug}`]]}
+  schema={[videoPromptSchema(lang, v, src)]}
+>
+  <div class="wrap pt-10">
+    <p class="label">
+      <a href={href(lang, '/videos')} class="hover:text-ink">{tv.title}</a> / {v.model}
+    </p>
+    <h1 class="display mt-3 max-w-4xl text-3xl sm:text-5xl">{v.title}</h1>
+    <dl class="mt-5 flex flex-wrap gap-x-8 gap-y-2 border-y border-ink py-3 font-mono text-xs">
+      <div><dt class="inline text-muted">{tp.model} </dt><dd class="inline font-bold">{v.model}</dd></div>
+      {v.likes > 0 && <div><dt class="inline text-muted">{tv.engagement} </dt><dd class="inline font-bold">{fmt(v.likes)}</dd></div>}
+      {v.date && <div><dt class="inline text-muted">{tp.date} </dt><dd class="inline font-bold">{v.date}</dd></div>}
+    </dl>
+
+    <div class="mt-8 grid gap-8 lg:grid-cols-[1fr_1.05fr] lg:gap-12">
+      <div>
+        {
+          v.video ? (
+            // preload="none": the clip is fetched from the original collection only when the visitor presses play.
+            <video
+              controls
+              playsinline
+              preload="none"
+              poster={v.poster || undefined}
+              class="block w-full border border-ink/15 bg-ink"
+              aria-label={v.title}
+            >
+              <source src={v.video} type="video/mp4" />
+            </video>
+          ) : (
+            <a href={v.sourceUrl} target="_blank" rel="noopener noreferrer nofollow" class="relative block border border-ink/15 bg-line/50">
+              <img src={v.poster} alt={v.title} referrerpolicy="no-referrer" class="block w-full" onerror="this.style.visibility='hidden'" />
+              <span class="absolute bottom-0 left-0 bg-ink px-3 py-2 font-mono text-[11px] uppercase tracking-[0.1em] text-paper">
+                {tv.watch}
+              </span>
+            </a>
+          )
+        }
+        {v.video && <p class="mt-2 text-xs text-muted">{tv.clipNote}</p>}
+      </div>
+
+      <div class="space-y-6 lg:sticky lg:top-20 lg:self-start">
+        {v.desc && <p class="text-lg leading-relaxed text-muted">{v.desc}</p>}
+        <PromptBox prompt={v.prompt} lang={lang} id={`v:${v.slug}`} />
+
+        <div class="border-t border-ink pt-3 text-sm">
+          <p class="label">{tp.credits}</p>
+          <dl class="mt-2 space-y-1.5">
+            {
+              v.author && (
+                <div class="grid grid-cols-[7.5rem_1fr]">
+                  <dt class="text-muted">{tp.author}</dt>
+                  <dd>
+                    {v.authorUrl ? (
+                      <a href={v.authorUrl} target="_blank" rel="noopener noreferrer nofollow" class="link font-semibold">{v.author}</a>
+                    ) : (
+                      v.author
+                    )}
+                  </dd>
+                </div>
+              )
+            }
+            {
+              v.sourceUrl && (
+                <div class="grid grid-cols-[7.5rem_1fr]">
+                  <dt class="text-muted">{tp.post}</dt>
+                  <dd><a href={v.sourceUrl} target="_blank" rel="noopener noreferrer nofollow" class="link font-semibold">{tp.viewSource}</a></dd>
+                </div>
+              )
+            }
+            <div class="grid grid-cols-[7.5rem_1fr]">
+              <dt class="text-muted">{tp.collection}</dt>
+              <dd>
+                <a href={src.url} target="_blank" rel="noopener noreferrer" class="link font-semibold">{src.name}</a>
+                {tp.by} {src.by} (<a href={src.licenseUrl} target="_blank" rel="noopener noreferrer" class="link">{src.license}</a>)
+              </dd>
+            </div>
+          </dl>
+          <p class="mt-3 text-xs text-muted">
+            {tv.ownerNote} <a href={href(lang, '/credits') + '#removal'} class="link">{tp.takedown}</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    {
+      related.length > 0 && (
+        <section class="pt-16">
+          <div class="sec">
+            <span class="label">{t.more}</span>
+            <h2>{tv.more}</h2>
+          </div>
+          <div class="mt-6 grid grid-cols-2 gap-x-5 gap-y-7 md:grid-cols-4">
+            {related.map((r) => <VideoCard v={r} lang={lang} />)}
+          </div>
+        </section>
+      )
+    }
+  </div>
+</Base>

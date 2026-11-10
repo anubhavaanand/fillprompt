@@ -21,6 +21,48 @@
       "license": "MIT",
       "licenseUrl": "https://github.com/ZeroLu/awesome-nanobanana-pro/blob/main/LICENSE"
     },
+    "freestylefly": {
+      "name": "Awesome GPT Image 2",
+      "by": "freestylefly",
+      "url": "https://github.com/freestylefly/awesome-gpt-image-2",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/freestylefly/awesome-gpt-image-2/blob/main/LICENSE"
+    },
+    "evolink": {
+      "name": "Awesome GPT Image 2 API & Prompts",
+      "by": "EvoLink AI",
+      "url": "https://github.com/Evolink-AI/awesome-gpt-image-2-API-Prompts",
+      "license": "CC0 1.0",
+      "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/"
+    },
+    "learnprompt": {
+      "name": "Awesome Seedance",
+      "by": "LearnPrompt",
+      "url": "https://github.com/LearnPrompt/awesome-seedance",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/LearnPrompt/awesome-seedance/blob/main/LICENSE"
+    },
+    "youmindseedance": {
+      "name": "Awesome Seedance 2 Prompts",
+      "by": "YouMind OpenLab",
+      "url": "https://github.com/YouMind-OpenLab/awesome-seedance-2-prompts",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    "oswseedance": {
+      "name": "Awesome Seedance Prompts",
+      "by": "opensource-works",
+      "url": "https://github.com/opensource-works/awesome-seedance-prompts",
+      "license": "MIT",
+      "licenseUrl": "https://github.com/opensource-works/awesome-seedance-prompts/blob/main/LICENSE"
+    },
+    "youmindgrok": {
+      "name": "Awesome Grok Imagine Prompts",
+      "by": "YouMind OpenLab",
+      "url": "https://github.com/YouMind-OpenLab/awesome-grok-imagine-prompts",
+      "license": "CC BY 4.0",
+      "licenseUrl": "https://creativecommons.org/licenses/by/4.0/"
+    },
     "promptschat": {
       "name": "prompts.chat",
       "by": "Fatih Kadir Akın & contributors",

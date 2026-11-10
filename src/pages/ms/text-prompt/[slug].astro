@@ -1,9 +1,0 @@
----
-// Malay route. The page body lives in src/views/TextPrompt.astro.
-import View from '../../../views/TextPrompt.astro';
-import { textPromptPaths } from '../../../lib/paths';
-
-export const getStaticPaths = () => textPromptPaths();
----
-
-<View lang="ms" t={Astro.props.t} more={Astro.props.more} />

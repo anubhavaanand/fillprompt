@@ -1,13 +1,14 @@
-// Two locales: English is the default and lives at the root, Malay lives under /ms.
-export type Lang = 'en' | 'ms';
-export const LANGS: Lang[] = ['en', 'ms'];
+// The site is English only. The `lang` plumbing stays so another language can be added later:
+// add its code to LANGS, a dictionary below, and a set of route files under src/pages/<code>/.
+export type Lang = 'en';
+export const LANGS: Lang[] = ['en'];
 export const DEFAULT_LANG: Lang = 'en';
 
-/** Prefix a root-relative path for the given locale. */
-export const href = (lang: Lang, path: string) => (lang === 'en' ? path : path === '/' ? '/ms' : `/ms${path}`);
+/** Root-relative path for the given locale. */
+export const href = (_lang: Lang, path: string) => path;
 
-/** Strip the locale prefix from a pathname. */
-export const barePath = (pathname: string) => pathname.replace(/^\/ms(?=\/|$)/, '') || '/';
+/** Pathname without a locale prefix. */
+export const barePath = (pathname: string) => pathname || '/';
 
 const n = (x: number) => x.toLocaleString('en-US');
 
@@ -24,27 +25,24 @@ export const categoryLabels: Record<Lang, Record<string, string>> = {
     'comic-anime': 'Comics & Anime',
     creative: 'Creative Experiments',
   },
-  ms: {
-    'portrait-avatar': 'Potret & Avatar',
-    photography: 'Fotografi',
-    'product-brand': 'Produk & Jenama',
-    'food-drink': 'Makanan & Minuman',
-    poster: 'Poster & Iklan',
-    'social-media': 'Media Sosial',
-    'infographic-ui': 'Infografik & UI',
-    'illustration-3d': 'Ilustrasi & 3D',
-    'comic-anime': 'Komik & Anime',
-    creative: 'Eksperimen Kreatif',
-  },
 };
 
 const en = {
   langName: 'English',
   langShort: 'EN',
-  siteDesc: 'A free collection of AI prompts for images, text and agent skills. Copy, fill in the blanks, use.',
-  nav: { images: 'Images', text: 'Text', skills: 'Skills', credits: 'Credits' },
+  siteDesc: 'A free collection of AI prompts for images, video, text and agent skills. Copy, fill in the blanks, use.',
+  nav: { images: 'Images', videos: 'Videos', text: 'Text', skills: 'Skills', credits: 'Credits', donate: 'Donate' },
+  skip: 'Skip to content',
   navLabel: 'Main',
   langLabel: 'Language',
+  theme: { toDark: 'Switch to dark theme', toLight: 'Switch to light theme' },
+  filter: {
+    label: 'Filter',
+    placeholder: 'Type to filter by keyword…',
+    showing: (c: number, total: number) => `${n(c)} of ${n(total)}`,
+    none: 'Nothing matches that filter.',
+    clear: 'Clear',
+  },
   home: 'home',
   search: 'Search',
   searchPrompts: 'Search prompts',
@@ -62,10 +60,12 @@ const en = {
     blurb: 'Ready-made prompts for working with AI. Collected from open-source projects, with the original author named on every prompt.',
     collections: 'Collections',
     imagePrompts: 'Image prompts',
+    videoPrompts: 'Video prompts',
     textPrompts: 'Text prompts',
     agentSkills: 'Agent skills',
     sources: 'Sources, licenses & credits',
     takedown: 'Request content removal',
+    donate: 'Support this site',
     strip: 'Free · no account · open source',
   },
 
@@ -76,14 +76,18 @@ const en = {
     line3: 'ready to copy.',
     words: ['product shots', 'festive posters', 'food menus', 'shop logos', 'infographics', 'video thumbnails'],
     lead: (total: number) =>
-      `${n(total)} prompts for generating images and writing with AI, each with a sample result. Pick one, fill in the blanks, paste into Gemini or ChatGPT.`,
+      `${n(total)} prompts for generating images, making videos and writing with AI, most with a sample result. Pick one, fill in the blanks, paste into Gemini or ChatGPT.`,
     statImages: 'image prompts',
+    statVideos: 'video prompts',
     statText: 'text prompts',
     statSkills: 'agent skills',
+    statCopied: 'prompts copied',
   },
   secCategories: 'Browse by category',
   secPopular: 'Most liked',
   secCurated: 'Curated picks',
+  secVideos: 'Video prompts',
+  allVideos: 'All video prompts →',
   secText: 'Text prompts',
   allImages: 'All image prompts →',
   allText: 'All text prompts →',
@@ -123,7 +127,26 @@ const en = {
     sameCategory: 'In the same category',
   },
 
-  box: { prompt: 'Prompt', copy: 'Copy', copied: 'Copied', failed: 'Failed', fill: 'Fill in the blanks' },
+  videos: {
+    title: 'Video prompts',
+    metaTitle: 'AI video prompts',
+    metaDesc: (c: number) => `${n(c)} free AI video prompts for Seedance, Grok Imagine and other video models, each with a sample clip.`,
+    lead: (c: number) => `${n(c)} prompts for Seedance, Grok Imagine and other video models, each with its sample clip. Open any one to copy its prompt.`,
+    detailMeta: (title: string, model: string) => `${title} · ${model} video prompt`,
+    engagement: 'Engagement',
+    watch: 'Watch on the original post ↗',
+    clipNote: 'The sample clip plays from the original collection’s server.',
+    ownerNote: 'Sample clips belong to the original author.',
+    more: 'More video prompts',
+    byModel: 'AI model',
+    modelMetaTitle: (model: string) => `${model} video prompts`,
+    modelMetaDesc: (c: number, model: string) => `${n(c)} free ${model} video prompts, each with its sample clip and the full prompt to copy.`,
+    modelLead: (c: number, model: string) => `${n(c)} prompts written for ${model}, each with its sample clip.`,
+    crumbModel: 'model',
+  },
+
+  box: { prompt: 'Prompt', copy: 'Copy', copied: 'Copied', failed: 'Failed', fill: 'Fill in the blanks', count: 'Copied {n} times' },
+  copiedTotal: 'prompts copied',
 
   text: {
     title: 'Text prompts',
@@ -136,31 +159,113 @@ const en = {
     contributor: 'Contributor',
     collection: 'Collection',
     others: 'Other prompts',
+    byType: 'Type',
+    forDevs: 'For developers',
+    typeMetaTitle: (label: string) => `${label} AI text prompts`,
+    typeLead: (c: number, label: string) => `${n(c)} prompts in ${label}.`,
+    crumbType: 'type',
   },
 
   skills: {
     title: 'Agent skills',
     metaTitle: 'AI agent skills',
-    metaDesc: 'Open-source skills for AI agents: PDF, slides, spreadsheets, web design and more.',
+    metaDesc: 'Open-source skills for AI agents such as Claude Code: motion design, video, interface design, PDF, slides, spreadsheets and more.',
     leadA: 'A skill is a folder of instructions (',
     leadB: ') that teaches an AI agent such as Claude to do one job. Download it from the original repo and put it in your agent’s skills folder.',
     licenses: { apache: 'Apache 2.0', proprietary: 'Anthropic, read-only', none: 'Not stated' } as Record<string, string>,
     source: 'Source',
     by: 'by',
     note: 'Each skill has its own license. Check the LICENSE.txt file in the skill folder before modifying or redistributing it.',
+    official: 'Official skills from Anthropic',
+    community: 'Community skills',
+    communityLead: 'Open-source skills from other teams and makers, linked to their own repositories. Each one is published under the license shown.',
+    topics: { motion: 'Motion design & video', design: 'Interface & visual design', more: 'Collections & other fields' } as Record<string, string>,
+    stars: (c: number) => `★ ${n(c)}`,
+    groupAll: 'All',
+    groupOfficial: 'Official',
   },
 
   searchPage: {
     label: 'Search',
     title: 'Search prompts',
-    metaDesc: 'Search thousands of free AI image and text prompts.',
+    metaDesc: 'Search thousands of free AI image, video and text prompts.',
     hint: 'Most prompts are written in English, so English keywords return the most results.',
     loading: 'Loading index…',
     loadFailed: 'The search index failed to load. Try reloading the page.',
     start: 'Type a keyword to start searching.',
     none: 'No results for',
     images: 'Image prompts',
+    videos: 'Video prompts',
     text: 'Text prompts',
+  },
+
+  faq: {
+    title: 'Questions and answers',
+    items: [
+      [
+        'What is mytemplate.my?',
+        'mytemplate.my is a free library of ready-made AI prompts for generating images, making videos and writing with AI, plus skills for AI agents. Every prompt comes from an open-source collection, names its original author and, where there is one, shows the result it produced.',
+      ],
+      [
+        'Is it really free?',
+        'Yes. There is no account, no ads and no paywall. Every prompt can be copied straight away. The site is paid for by optional donations.',
+      ],
+      [
+        'Which AI models do the prompts work with?',
+        'Image prompts are written for Nano Banana, Nano Banana Pro (Gemini) and GPT Image 2 (ChatGPT). Video prompts are written for Seedance, Grok Imagine and similar video models. Text prompts work in ChatGPT, Claude, Gemini and most other chat models.',
+      ],
+      [
+        'How do I use a prompt?',
+        'Open a prompt, fill in any blanks such as [OBJECT] using the fields above the text, press Copy, then paste it into the AI tool of your choice. For image prompts that mention a reference photo, upload your own photo together with the prompt.',
+      ],
+      [
+        'Can I use the prompts and results commercially?',
+        'Each collection has its own open license (MIT, CC BY 4.0 or CC0), listed on the Credits page; CC BY asks you to credit the author. The sample images and clips belong to their authors. What you generate yourself is governed by the terms of the AI tool you use.',
+      ],
+    ] as [string, string][],
+  },
+
+  support: {
+    title: 'Enjoying the prompts?',
+    body: 'mytemplate.my is free with no account and no ads. A small donation helps cover the domain and hosting.',
+    cta: 'Support this site',
+  },
+
+  donate: {
+    label: 'Support',
+    metaTitle: 'Support mytemplate.my · Donate',
+    metaDesc: 'mytemplate.my is free, with no account and no ads. If it saved you time, support it with a small donation via DuitNow QR or Ko-fi.',
+    h1a: 'Keep mytemplate.my',
+    h1b: 'free for everyone',
+    intro: 'No account, no ads, no paywall. If a prompt here saved you time, a small donation helps cover the domain, hosting and the work of adding new prompts.',
+    thanks: 'Terima kasih!',
+    qrTitle: 'DuitNow QR',
+    qrSub: 'Any Malaysian bank or e-wallet',
+    payTo: 'Pay to',
+    qrAlt: (bank: string, name: string) => `DuitNow QR code for ${name}, ${bank}`,
+    saveLabel: (bank: string) => `Save the ${bank} QR image`,
+    save: 'Save QR',
+    check: 'Before you confirm, check that your banking app shows',
+    kofiTitle: 'Ko-fi',
+    kofiSub: 'Card or PayPal · from anywhere',
+    kofiBody: 'Outside Malaysia, or prefer to pay by card? Ko-fi takes a one-time tip in a few taps.',
+    kofiCta: 'Support on Ko-fi ↗',
+    kofiQrAlt: 'QR code that opens ko-fi.com/mwrazzuwan',
+    kofiScan: 'Scan with your phone camera',
+    howTo: 'How to donate with DuitNow',
+    steps: [
+      ['Scan or save a QR', 'Both codes pay the same person. On your phone, tap “Save QR” and pick the image in your banking app.'],
+      ['Open your bank or e-wallet', 'Any DuitNow app works: Maybank2u, CIMB, RHB, Bank Islam, Touch ’n Go eWallet, Boost and more.'],
+      ['Choose any amount', 'Enter whatever you like and confirm. Every ringgit helps keep the site free.'],
+    ] as [string, string][],
+    optional: 'Donations are optional and unlock nothing: every prompt stays free for everyone.',
+  },
+
+  notFound: {
+    title: 'Page not found',
+    body: 'This page does not exist or has been removed.',
+    home: 'Back to home',
+    search: 'Search prompts',
   },
 
   credits: {
@@ -172,11 +277,13 @@ const en = {
     thLicense: 'License',
     thUsed: 'Used for',
     usedImages: (c: number) => `${n(c)} image prompts`,
+    usedVideos: (c: number) => `${n(c)} video prompts`,
     usedText: (c: number) => `${n(c)} text prompts`,
     usedSkills: (c: number) => `${n(c)} skills (links only)`,
+    communityNote: (c: number) => `The Skills page also links to ${n(c)} community skill repositories. Only their names, descriptions and licenses are shown; the skills themselves stay in their own repositories.`,
     perSkill: 'Per-skill license',
     imagesTitle: 'About the sample images',
-    imagesBody: 'Sample images are displayed directly from the original collections’ servers and remain the property of their authors. mytemplate.my does not store copies of them.',
+    imagesBody: 'Sample images and video clips are displayed directly from the original collections’ servers and remain the property of their authors. mytemplate.my does not store copies of them.',
     takedownTitle: 'Request content removal',
     takedownA: 'If you own a prompt or image and want it removed, email',
     takedownB: 'with the link to the page. We will remove it as soon as possible.',
@@ -185,149 +292,4 @@ const en = {
 
 type Dict = typeof en;
 
-const ms: Dict = {
-  langName: 'Bahasa Melayu',
-  langShort: 'BM',
-  siteDesc: 'Koleksi percuma prompt AI untuk imej, teks dan skill ejen. Salin, isi ruang kosong, guna terus.',
-  nav: { images: 'Imej', text: 'Teks', skills: 'Skill', credits: 'Kredit' },
-  navLabel: 'Utama',
-  langLabel: 'Bahasa',
-  home: 'laman utama',
-  search: 'Cari',
-  searchPrompts: 'Cari prompt',
-  searchHint: 'product, poster, logo, resume…',
-  collection: 'Koleksi',
-  about: 'Tentang',
-  more: 'Lagi',
-  page: (p) => `halaman ${p}`,
-  prev: '← Sebelum',
-  next: 'Seterusnya →',
-  pagination: 'Halaman',
-  all: 'Semua',
-
-  footer: {
-    blurb: 'Prompt siap pakai untuk kerja AI. Dikumpul daripada projek sumber terbuka, dengan nama pengarang asal pada setiap prompt.',
-    collections: 'Koleksi',
-    imagePrompts: 'Prompt imej',
-    textPrompts: 'Prompt teks',
-    agentSkills: 'Skill ejen',
-    sources: 'Sumber, lesen & kredit',
-    takedown: 'Minta kandungan dibuang',
-    strip: 'Percuma · tanpa akaun · sumber terbuka',
-  },
-
-  homeTitle: 'mytemplate.my · Prompt AI siap pakai, percuma',
-  hero: {
-    label: 'Koleksi sumber terbuka · percuma',
-    line1: 'Prompt AI untuk',
-    line3: 'sedia disalin.',
-    words: ['gambar produk', 'poster raya', 'menu makanan', 'logo kedai', 'infografik', 'thumbnail video'],
-    lead: (total) =>
-      `${n(total)} prompt untuk jana imej dan menulis dengan AI, setiap satu dengan contoh hasil. Pilih, isi ruang kosong, tampal ke Gemini atau ChatGPT.`,
-    statImages: 'prompt imej',
-    statText: 'prompt teks',
-    statSkills: 'skill ejen',
-  },
-  secCategories: 'Cari ikut kategori',
-  secPopular: 'Paling disukai',
-  secCurated: 'Pilihan terkurasi',
-  secText: 'Prompt teks',
-  allImages: 'Semua prompt imej →',
-  allText: 'Semua prompt teks →',
-  skillsTeaser: {
-    title: 'Skill untuk ejen AI',
-    body: 'Skill ialah folder arahan yang mengajar ejen seperti Claude membuat satu kerja dengan betul: hasilkan PDF, bina slaid, reka antara muka.',
-    cta: (c) => `Lihat ${c} skill`,
-  },
-
-  images: {
-    title: 'Prompt imej',
-    metaTitle: 'Prompt imej AI',
-    metaDesc: (c) => `${n(c)} prompt imej AI percuma dengan contoh hasil untuk Nano Banana, GPT Image dan lain-lain.`,
-    lead: (c) => `${n(c)} prompt dengan contoh hasil. Buka mana-mana satu untuk salin promptnya.`,
-    crumbCategory: 'kategori',
-    catMetaTitle: (label) => `Prompt ${label}`,
-    catMetaDesc: (c, label) => `${n(c)} prompt imej AI percuma dalam kategori ${label}, lengkap dengan contoh hasil.`,
-    catLead: (c) => `${n(c)} prompt dalam kategori ini.`,
-    count: (c) => `×${c}`,
-  },
-
-  prompt: {
-    metaTitle: (title, model) => `${title} · prompt ${model}`,
-    model: 'Model',
-    category: 'Kategori',
-    likes: 'Suka',
-    date: 'Tarikh',
-    example: (i) => `contoh ${i}`,
-    credits: 'Kredit',
-    author: 'Pengarang asal',
-    post: 'Hantaran asal',
-    viewSource: 'Lihat sumber ↗',
-    collection: 'Koleksi',
-    by: 'oleh',
-    imageNote: 'Imej contoh milik pengarang asal.',
-    takedown: 'Minta dibuang',
-    sameCategory: 'Dalam kategori yang sama',
-  },
-
-  box: { prompt: 'Prompt', copy: 'Salin', copied: 'Disalin', failed: 'Gagal', fill: 'Isi ruang kosong' },
-
-  text: {
-    title: 'Prompt teks',
-    metaTitle: 'Prompt teks AI',
-    metaDesc: (c) => `${n(c)} prompt teks percuma untuk ChatGPT, Claude, Gemini dan model AI lain.`,
-    lead: (c) => `${n(c)} prompt untuk ChatGPT, Claude, Gemini dan model lain. Sumber: prompts.chat, domain awam (CC0).`,
-    types: { text: 'Teks', structured: 'Berstruktur', image: 'Imej' },
-    dev: 'pembangun',
-    detailMeta: (title) => `${title} · prompt teks AI`,
-    contributor: 'Penyumbang',
-    collection: 'Koleksi',
-    others: 'Prompt lain',
-  },
-
-  skills: {
-    title: 'Skill ejen',
-    metaTitle: 'Skill ejen AI',
-    metaDesc: 'Senarai skill sumber terbuka untuk ejen AI: PDF, slaid, hamparan, reka bentuk web dan banyak lagi.',
-    leadA: 'Skill ialah folder arahan (',
-    leadB: ') yang mengajar ejen AI seperti Claude membuat satu kerja. Muat turun dari repo asal dan letak dalam folder skill ejen anda.',
-    licenses: { apache: 'Apache 2.0', proprietary: 'Anthropic, baca sahaja', none: 'Tidak dinyatakan' },
-    source: 'Sumber',
-    by: 'oleh',
-    note: 'Setiap skill ada lesen sendiri. Semak fail LICENSE.txt dalam folder skill sebelum mengubah suai atau mengedar semula.',
-  },
-
-  searchPage: {
-    label: 'Carian',
-    title: 'Cari prompt',
-    metaDesc: 'Cari antara ribuan prompt imej dan teks AI percuma.',
-    hint: 'Kebanyakan prompt dalam Bahasa Inggeris, jadi kata kunci Inggeris memberi lebih banyak hasil.',
-    loading: 'Memuatkan indeks…',
-    loadFailed: 'Indeks carian gagal dimuatkan. Cuba muat semula halaman.',
-    start: 'Taip kata kunci untuk mula mencari.',
-    none: 'Tiada hasil untuk',
-    images: 'Prompt imej',
-    text: 'Prompt teks',
-  },
-
-  credits: {
-    title: 'Sumber, lesen & kredit',
-    metaDesc: 'Senarai projek sumber terbuka yang menjadi sumber kandungan mytemplate.my, berserta lesen masing-masing.',
-    lead: 'Kandungan mytemplate.my dikumpul daripada projek sumber terbuka di bawah. Setiap prompt memaparkan pengarang asal dan pautan ke sumbernya. Sebahagian tajuk dipendekkan dan kategori disusun semula; teks prompt tidak diubah.',
-    thCollection: 'Koleksi',
-    thBy: 'Oleh',
-    thLicense: 'Lesen',
-    thUsed: 'Diguna untuk',
-    usedImages: (c) => `${n(c)} prompt imej`,
-    usedText: (c) => `${n(c)} prompt teks`,
-    usedSkills: (c) => `${n(c)} skill (pautan sahaja)`,
-    perSkill: 'Lesen berbeza bagi setiap skill',
-    imagesTitle: 'Tentang imej contoh',
-    imagesBody: 'Imej contoh dipaparkan terus dari pelayan koleksi asal dan kekal milik pengarang masing-masing. mytemplate.my tidak menyimpan salinan imej tersebut.',
-    takedownTitle: 'Minta kandungan dibuang',
-    takedownA: 'Jika anda pemilik sesuatu prompt atau imej dan mahu ia dibuang, e-mel',
-    takedownB: 'dengan pautan halaman berkenaan. Kami akan membuangnya secepat mungkin.',
-  },
-};
-
-export const ui: Record<Lang, Dict> = { en, ms };
+export const ui: Record<Lang, Dict> = { en };

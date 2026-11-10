@@ -4,6 +4,7 @@ import ImageCard from '../components/ImageCard.astro';
 import PromptBox from '../components/PromptBox.astro';
 import { sources, excerpt, fmt, type ImagePrompt } from '../lib/data';
 import { ui, href, categoryLabels, type Lang } from '../i18n';
+import { clip, imagePromptSchema } from '../lib/seo';
 
 interface Props {
   lang: Lang;
@@ -17,7 +18,14 @@ const cat = categoryLabels[lang];
 const src = sources[p.source];
 ---
 
-<Base lang={lang} title={tp.metaTitle(p.title, p.model)} description={p.desc || excerpt(p.prompt, 155)} image={p.images[0]}>
+<Base
+  lang={lang}
+  title={tp.metaTitle(clip(p.title, 52), p.model)}
+  description={p.desc ? excerpt(p.desc, 155) : excerpt(p.prompt, 155)}
+  image={p.images[0]}
+  crumbs={[[t.images.title, '/images'], [cat[p.cats[0]], `/category/${p.cats[0]}`], [p.title, `/prompt/${p.slug}`]]}
+  schema={[imagePromptSchema(lang, p, src)]}
+>
   <div class="wrap pt-10">
     <p class="label">
       <a href={href(lang, '/images')} class="hover:text-ink">{t.images.title}</a> /
@@ -56,7 +64,7 @@ const src = sources[p.source];
 
       <div class="space-y-6 lg:sticky lg:top-20 lg:self-start">
         {p.desc && <p class="text-lg leading-relaxed text-muted">{p.desc}</p>}
-        <PromptBox prompt={p.prompt} lang={lang} />
+        <PromptBox prompt={p.prompt} lang={lang} id={`i:${p.slug}`} />
 
         <div class="border-t border-ink pt-3 text-sm">
           <p class="label">{tp.credits}</p>

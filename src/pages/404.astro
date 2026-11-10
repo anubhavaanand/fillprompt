@@ -1,0 +1,25 @@
+---
+// The 404 page.
+import Base from '../layouts/Base.astro';
+import { ui, href, LANGS } from '../i18n';
+---
+
+<Base lang="en" title={ui.en.notFound.title} noindex>
+  <div class="wrap py-20">
+    <p class="label">404</p>
+    {
+      LANGS.map((l) => (
+        <div data-nf={l} lang={l} hidden={l !== 'en'}>
+          <h1 class="display mt-2 text-4xl sm:text-6xl">
+            <mark>{ui[l].notFound.title}</mark>
+          </h1>
+          <p class="mt-5 max-w-xl text-lg text-muted">{ui[l].notFound.body}</p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <a href={href(l, '/')} class="btn">{ui[l].notFound.home}</a>
+            <a href={href(l, '/search')} class="btn-line">{ui[l].notFound.search}</a>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</Base>

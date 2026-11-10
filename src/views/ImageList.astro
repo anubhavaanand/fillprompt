@@ -6,6 +6,7 @@ import CategoryChips from '../components/CategoryChips.astro';
 import Pagination from '../components/Pagination.astro';
 import { images } from '../lib/data';
 import { ui, href, categoryLabels, type Lang } from '../i18n';
+import { itemList } from '../lib/seo';
 
 interface Props {
   lang: Lang;
@@ -17,10 +18,12 @@ const t = ui[lang];
 const label = cat ? categoryLabels[lang][cat] : '';
 const suffix = page.currentPage > 1 ? `, ${t.page(page.currentPage)}` : '';
 const title = (cat ? t.images.catMetaTitle(label) : t.images.metaTitle) + suffix;
+const crumbs: [string, string][] = cat ? [[t.images.title, '/images'], [label, `/category/${cat}`]] : [[t.images.title, '/images']];
+const schema = [itemList(lang, page.data.map((p) => `/prompt/${p.slug}`))];
 const description = cat ? t.images.catMetaDesc(page.total, label) : t.images.metaDesc(images.length);
 ---
 
-<Base lang={lang} title={title} description={description}>
+<Base lang={lang} title={title} description={description} crumbs={crumbs} schema={schema}>
   <div class="wrap pt-10">
     {
       cat ? (

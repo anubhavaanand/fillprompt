@@ -1,0 +1,36 @@
+---
+import type { VideoPrompt } from '../lib/data';
+import { href, type Lang } from '../i18n';
+interface Props {
+  v: VideoPrompt;
+  lang: Lang;
+  eager?: boolean;
+}
+const { v, lang, eager = false } = Astro.props;
+---
+
+<a href={href(lang, `/video/${v.slug}`)} class="tile group block">
+  <span class="tile-img aspect-video overflow-hidden">
+    {
+      v.poster && (
+        <img
+          src={v.poster}
+          alt={v.title}
+          loading={eager ? 'eager' : 'lazy'}
+          decoding="async"
+          referrerpolicy="no-referrer"
+          class="h-full w-full object-cover"
+          onerror="this.style.visibility='hidden'"
+        />
+      )
+    }
+    <span class="absolute bottom-0 left-0 flex items-center gap-1.5 bg-ink px-2 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-paper">
+      <svg width="8" height="9" viewBox="0 0 8 9" aria-hidden="true"><path d="M0 0l8 4.5L0 9z" fill="#ffd83d"></path></svg>
+      {v.model}
+    </span>
+  </span>
+  <span class="mt-2.5 block">
+    <span class="line-clamp-2 block text-[15px] font-semibold leading-snug">{v.title}</span>
+    {v.author && <span class="label mt-1 block">{v.author}</span>}
+  </span>
+</a>

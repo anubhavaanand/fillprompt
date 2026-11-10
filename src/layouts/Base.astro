@@ -1,29 +1,83 @@
 ---
 import '../styles/global.css';
 import Logo from '../components/Logo.astro';
-import { ui, href, barePath, LANGS, type Lang } from '../i18n';
+import { ui, href, barePath, type Lang } from '../i18n';
+import { SITE, url } from '../lib/seo';
 
 interface Props {
   lang: Lang;
   title: string;
   description?: string;
   image?: string;
+  noindex?: boolean;
+  /** Breadcrumb trail after "Home": [label, root-relative path] pairs. */
+  crumbs?: [string, string][];
+  /** Extra schema.org objects for this page. */
+  schema?: Record<string, unknown>[];
 }
-const { lang, title, image } = Astro.props;
+const { lang, title, noindex = false, crumbs = [], schema = [] } = Astro.props;
+const image = Astro.props.image ?? new URL('/og.png', Astro.site).href;
 const t = ui[lang];
 const description = Astro.props.description ?? t.siteDesc;
-const fullTitle = title.includes('mytemplate') ? title : `${title} · mytemplate.my`;
-const bare = barePath(Astro.url.pathname);
+// Long titles drop the site suffix so the page's own words fit in a search result.
+const fullTitle = title.includes('mytemplate') || title.length > 48 ? title : `${title} · mytemplate.my`;
+// No trailing slash: the host redirects /images/ to /images, and the canonical must name the final URL.
+const bare = barePath(Astro.url.pathname).replace(/(.)\/+$/, '$1');
 const abs = (l: Lang) => new URL(href(l, bare), Astro.site);
 const nav = [
   ['/images', t.nav.images],
+  ['/videos', t.nav.videos],
   ['/text', t.nav.text],
   ['/skills', t.nav.skills],
   ['/credits', t.nav.credits],
+  ['/donate', t.nav.donate],
 ];
+const graphs: Record<string, unknown>[] = [...schema];
+if (bare === '/') {
+  graphs.push(
+    {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: 'mytemplate.my',
+      url: url(lang, '/'),
+      inLanguage: lang,
+      description,
+      publisher: { '@id': `${SITE}/#org` },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: `${url(lang, '/search')}?q={search_term_string}`,
+        'query-input': 'required name=search_term_string',
+      },
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      '@id': `${SITE}/#org`,
+      name: 'mytemplate.my',
+      url: SITE,
+      logo: `${SITE}/apple-touch-icon.png`,
+      description: ui.en.siteDesc,
+      sameAs: ['https://github.com/haritel97/mytemplate.my', 'https://ko-fi.com/mwrazzuwan'],
+    },
+  );
+}
+if (crumbs.length) {
+  graphs.push({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [['mytemplate.my', '/'], ...crumbs].map(([name, path], i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name,
+      item: url(lang, path),
+    })),
+  });
+}
+const ld = graphs.map((g) => JSON.stringify(g).replace(/</g, '\\u003c'));
 const isOn = (p: string) =>
   bare.startsWith(p) ||
   (p === '/images' && /^\/(category|prompt)\//.test(bare)) ||
+  (p === '/videos' && bare.startsWith('/video/')) ||
   (p === '/text' && bare.startsWith('/text-prompt'));
 ---
 
@@ -31,22 +85,45 @@ const isOn = (p: string) =>
 <html lang={lang}>
   <head>
     <meta charset="utf-8" />
+    <script is:inline>
+      // Set the theme before the first paint: the saved choice, else the system preference.
+      (() => {
+        let theme;
+        try {
+          theme = localStorage.getItem('theme');
+        } catch {}
+        if (theme !== 'dark' && theme !== 'light') theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
-    <link rel="canonical" href={abs(lang)} />
-    {LANGS.map((l) => <link rel="alternate" hreflang={l} href={abs(l)} />)}
-    <link rel="alternate" hreflang="x-default" href={abs('en')} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {
+      !noindex && (
+        <>
+          <link rel="canonical" href={abs(lang)} />
+        </>
+      )
+    }
     <meta property="og:site_name" content="mytemplate.my" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={abs(lang)} />
     <meta property="og:locale" content={lang === 'ms' ? 'ms_MY' : 'en_US'} />
-    {image && <meta property="og:image" content={image} />}
-    <meta name="twitter:card" content={image ? 'summary_large_image' : 'summary'} />
+    <meta property="og:image" content={image} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
     <meta name="theme-color" content="#f3f0e8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="sitemap" href="/sitemap.xml" />
+    <link rel="help" type="text/plain" href="/llms.txt" title="llms.txt" />
+    {!noindex && ld.map((json) => <script type="application/ld+json" set:html={json} />)}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -55,6 +132,7 @@ const isOn = (p: string) =>
     />
   </head>
   <body class="flex min-h-screen flex-col">
+    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:bg-mark focus:px-3 focus:py-2 focus:text-sm focus:font-bold">{t.skip}</a>
     <header class="sticky top-0 z-20 border-b border-ink bg-paper">
       <div class="wrap flex h-14 items-center gap-4 sm:gap-6">
         <a href={href(lang, '/')} aria-label={`mytemplate.my, ${t.home}`}><Logo /></a>
@@ -83,28 +161,24 @@ const isOn = (p: string) =>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m20 20-4.5-4.5"></path></svg>
           </button>
         </form>
-        <div class="ml-auto flex border border-ink font-mono text-xs font-bold sm:ml-0" role="group" aria-label={t.langLabel}>
-          {
-            LANGS.map((l) => (
-              <a
-                href={href(l, bare)}
-                hreflang={l}
-                lang={l}
-                data-lang={l}
-                title={ui[l].langName}
-                aria-current={l === lang ? 'true' : undefined}
-                class:list={['px-2 py-1.5 transition-colors', l === lang ? 'bg-ink text-paper' : 'hover:bg-mark']}
-              >
-                {ui[l].langShort}
-              </a>
-            ))
-          }
-        </div>
+        <button
+          type="button"
+          id="theme-toggle"
+          class="ml-auto grid h-9 w-9 shrink-0 cursor-pointer place-items-center border border-ink transition-colors hover:bg-mark sm:ml-0"
+          data-to-dark={t.theme.toDark}
+          data-to-light={t.theme.toLight}
+          aria-label={t.theme.toDark}
+          title={t.theme.toDark}
+        >
+          {/* Sun shows in the dark theme, moon in the light theme: the icon names where a click takes you. */}
+          <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"></path></svg>
+          <svg class="icon-sun" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="currentColor"></circle><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M19.1 4.9l-1.8 1.8M6.7 17.3l-1.8 1.8"></path></svg>
+        </button>
       </div>
       <nav class="wrap flex items-center gap-5 overflow-x-auto border-t border-line py-2 md:hidden" aria-label={t.navLabel}>
         {
           nav.map(([p, label]) => (
-            <a href={href(lang, p)} class:list={['whitespace-nowrap text-sm font-semibold', isOn(p) ? 'bg-mark px-1.5' : 'text-muted']}>
+            <a href={href(lang, p)} aria-current={isOn(p) ? 'page' : undefined} class:list={['whitespace-nowrap text-sm font-semibold', isOn(p) ? 'bg-mark px-1.5' : 'text-muted']}>
               {label}
             </a>
           ))
@@ -115,20 +189,21 @@ const isOn = (p: string) =>
       </nav>
     </header>
 
-    <main class="flex-1">
+    <main id="main" class="flex-1">
       <slot />
     </main>
 
     <footer class="mt-24 bg-ink text-paper">
       <div class="wrap grid gap-10 py-12 md:grid-cols-[1.4fr_1fr_1fr]">
         <div>
-          <Logo invert size={30} />
+          <Logo size={30} />
           <p class="mt-4 max-w-sm text-sm leading-relaxed text-paper/70">{t.footer.blurb}</p>
         </div>
         <div>
           <p class="font-mono text-[11px] uppercase tracking-[0.14em] text-paper/50">{t.footer.collections}</p>
           <ul class="mt-3 space-y-2 text-sm">
             <li><a class="hover:text-mark" href={href(lang, '/images')}>{t.footer.imagePrompts}</a></li>
+            <li><a class="hover:text-mark" href={href(lang, '/videos')}>{t.footer.videoPrompts}</a></li>
             <li><a class="hover:text-mark" href={href(lang, '/text')}>{t.footer.textPrompts}</a></li>
             <li><a class="hover:text-mark" href={href(lang, '/skills')}>{t.footer.agentSkills}</a></li>
           </ul>
@@ -138,15 +213,7 @@ const isOn = (p: string) =>
           <ul class="mt-3 space-y-2 text-sm">
             <li><a class="hover:text-mark" href={href(lang, '/credits')}>{t.footer.sources}</a></li>
             <li><a class="hover:text-mark" href={href(lang, '/credits') + '#removal'}>{t.footer.takedown}</a></li>
-            <li>
-              {
-                LANGS.filter((l) => l !== lang).map((l) => (
-                  <a class="hover:text-mark" href={href(l, bare)} hreflang={l} lang={l} data-lang={l}>
-                    {ui[l].langName}
-                  </a>
-                ))
-              }
-            </li>
+            <li><a class="hover:text-mark" href={href(lang, '/donate')}><span class="text-hot" aria-hidden="true">♥</span> {t.footer.donate}</a></li>
           </ul>
         </div>
       </div>
@@ -156,14 +223,26 @@ const isOn = (p: string) =>
     </footer>
 
     <script is:inline>
-      // Remember an explicit language choice so the home page can honour it next visit.
-      document.querySelectorAll('a[data-lang]').forEach((a) =>
-        a.addEventListener('click', () => {
+      // Theme toggle: flips the theme, remembers the choice, and keeps the button's label in step.
+      (() => {
+        const btn = document.getElementById('theme-toggle');
+        const root = document.documentElement;
+        const sync = () => {
+          const dark = root.dataset.theme === 'dark';
+          const label = dark ? btn.dataset.toLight : btn.dataset.toDark;
+          btn.setAttribute('aria-label', label);
+          btn.title = label;
+          document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#131210' : '#f3f0e8');
+        };
+        btn.addEventListener('click', () => {
+          root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
           try {
-            localStorage.setItem('lang', a.dataset.lang);
+            localStorage.setItem('theme', root.dataset.theme);
           } catch {}
-        }),
-      );
+          sync();
+        });
+        sync();
+      })();
     </script>
   </body>
 </html>

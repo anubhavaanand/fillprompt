@@ -1,0 +1,9 @@
+---
+// Text prompts of one type. The page body lives in src/views/TextList.astro.
+import View from '../../../views/TextList.astro';
+import { textTypePaths } from '../../../lib/paths';
+
+export const getStaticPaths = ({ paginate }) => textTypePaths(paginate);
+---
+
+<View lang="en" page={Astro.props.page} type={Astro.params.type} />

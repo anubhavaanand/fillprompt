@@ -1,8 +1,9 @@
 // getStaticPaths helpers shared by the English (root) and Malay (/ms) route files.
-import { images, texts, catSlugs } from './data';
+import { images, texts, videos, catSlugs, videoModels, TEXT_FILTERS, inTextFilter, textFilterCounts } from './data';
 
 export const IMAGE_PAGE = 48;
 export const TEXT_PAGE = 60;
+export const VIDEO_PAGE = 36;
 
 export const imageListPaths = (paginate: any) => paginate(images, { pageSize: IMAGE_PAGE });
 
@@ -25,7 +26,31 @@ export const imagePromptPaths = () => {
   });
 };
 
+export const videoListPaths = (paginate: any) => paginate(videos, { pageSize: VIDEO_PAGE });
+
+export const videoModelPaths = (paginate: any) =>
+  videoModels.flatMap((m) =>
+    paginate(
+      videos.filter((v) => v.model === m.label),
+      { params: { model: m.slug }, pageSize: VIDEO_PAGE },
+    ),
+  );
+
+export const videoPromptPaths = () =>
+  videos.map((v, i) => ({
+    params: { slug: v.slug },
+    props: { v, related: [1, 2, 3, 4].map((d) => videos[(i + d) % videos.length]) },
+  }));
+
 export const textListPaths = (paginate: any) => paginate(texts, { pageSize: TEXT_PAGE });
+
+export const textTypePaths = (paginate: any) =>
+  TEXT_FILTERS.filter((f) => textFilterCounts[f]).flatMap((f) =>
+    paginate(
+      texts.filter((t) => inTextFilter(t, f)),
+      { params: { type: f }, pageSize: TEXT_PAGE },
+    ),
+  );
 
 export const textPromptPaths = () =>
   texts.map((t, i) => ({

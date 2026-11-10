@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import PromptBox from '../components/PromptBox.astro';
 import { sources, excerpt, type TextPrompt } from '../lib/data';
 import { ui, href, type Lang } from '../i18n';
+import { clip, textPromptSchema } from '../lib/seo';
 
 interface Props {
   lang: Lang;
@@ -14,14 +15,20 @@ const t = ui[lang];
 const src = sources.promptschat;
 ---
 
-<Base lang={lang} title={t.text.detailMeta(x.title)} description={excerpt(x.prompt, 155)}>
+<Base
+  lang={lang}
+  title={t.text.detailMeta(clip(x.title, 52))}
+  description={excerpt(x.prompt, 155)}
+  crumbs={[[t.text.title, '/text'], [x.title, `/text-prompt/${x.slug}`]]}
+  schema={[textPromptSchema(lang, x, src)]}
+>
   <div class="wrap max-w-4xl pt-10">
     <p class="label">
       <a href={href(lang, '/text')} class="hover:text-ink">{t.text.title}</a> / {t.text.types[x.type] ?? x.type}{x.forDevs && ` / ${t.text.dev}`}
     </p>
     <h1 class="display mt-3 text-3xl sm:text-5xl">{x.title}</h1>
 
-    <div class="mt-8"><PromptBox prompt={x.prompt} lang={lang} /></div>
+    <div class="mt-8"><PromptBox prompt={x.prompt} lang={lang} id={`t:${x.slug}`} /></div>
 
     <p class="mt-4 text-sm text-muted">
       {

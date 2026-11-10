@@ -3,18 +3,32 @@
 // {argument name="x" default="y"} become input fields that fill the prompt live,
 // and stay highlighted in the text so the reader sees what is theirs to change.
 import { ui, type Lang } from '../i18n';
+import { COUNTER } from '../lib/counter';
 interface Props {
   prompt: string;
   lang: Lang;
+  /** Counter key: i:<slug> for image prompts, t:<slug> for text prompts. */
+  id: string;
 }
-const { prompt, lang } = Astro.props;
+const { prompt, lang, id } = Astro.props;
 const t = ui[lang].box;
 const json = JSON.stringify(prompt).replace(/</g, '\\u003c');
 ---
 
-<div class="prompt-box border border-ink bg-surface" data-copy={t.copy} data-copied={t.copied} data-failed={t.failed}>
+<div
+  class="prompt-box border border-ink bg-surface"
+  data-copy={t.copy}
+  data-copied={t.copied}
+  data-failed={t.failed}
+  data-id={id}
+  data-count={t.count}
+  data-api={COUNTER.url}
+  data-key={COUNTER.key}
+  data-min={COUNTER.minShown}
+>
   <div class="flex items-center justify-between gap-3 bg-ink py-2 pl-4 pr-2 text-paper">
     <span class="font-mono text-[11px] uppercase tracking-[0.14em]">{t.prompt}</span>
+    <span class="count ml-auto hidden font-mono text-[11px] uppercase tracking-[0.14em] text-paper/60" aria-live="polite"></span>
     <button
       type="button"
       class="copy cursor-pointer bg-mark px-3 py-1.5 text-sm font-bold text-ink transition-colors hover:bg-paper"
@@ -86,11 +100,33 @@ const json = JSON.stringify(prompt).replace(/</g, '\\u003c');
       box.querySelector('.vars').classList.remove('hidden');
     }
     render();
+    // Copy counter: read the count on load, add one on the first copy of this prompt per browser session.
+    const { id, api, key } = box.dataset;
+    const countEl = box.querySelector('.count');
+    const showCount = (n) => {
+      if (!(n >= Number(box.dataset.min))) return;
+      countEl.textContent = box.dataset.count.replace('{n}', Number(n).toLocaleString('en-US'));
+      countEl.classList.remove('hidden');
+    };
+    const rpc = (fn, init) => fetch(api + '/' + fn, { ...init, headers: { apikey: key, 'Content-Type': 'application/json' } }).then((r) => (r.ok ? r.json() : null));
+    rpc('mt_copy_get?k=' + encodeURIComponent(id))
+      .then((d) => d && showCount(d.n))
+      .catch(() => {});
+    const bump = () => {
+      try {
+        if (sessionStorage.getItem('copied:' + id)) return;
+        sessionStorage.setItem('copied:' + id, '1');
+      } catch {}
+      rpc('mt_copy_bump', { method: 'POST', body: JSON.stringify({ k: id }), keepalive: true })
+        .then(showCount)
+        .catch(() => {});
+    };
     const btn = box.querySelector('.copy');
     btn.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(out.textContent);
         btn.textContent = box.dataset.copied;
+        bump();
       } catch {
         btn.textContent = box.dataset.failed;
       }

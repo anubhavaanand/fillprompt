@@ -1,38 +1,79 @@
 ---
+// Paginated list of text prompts: all of them, or one type when `type` is set.
 import Base from '../layouts/Base.astro';
 import Pagination from '../components/Pagination.astro';
-import { texts, excerpt, pad } from '../lib/data';
+import QuickFilter from '../components/QuickFilter.astro';
+import { texts, excerpt, pad, fmt, TEXT_FILTERS, textFilterCounts } from '../lib/data';
 import { TEXT_PAGE } from '../lib/paths';
 import { ui, href, type Lang } from '../i18n';
+import { itemList } from '../lib/seo';
 
 interface Props {
   lang: Lang;
   page: any;
+  type?: string;
 }
-const { lang, page } = Astro.props;
+const { lang, page, type } = Astro.props;
 const t = ui[lang];
+const tt = t.text;
+const labelOf = (f: string) => (f === 'developer' ? tt.forDevs : (tt.types[f] ?? f));
+const label = type ? labelOf(type) : '';
 const suffix = page.currentPage > 1 ? `, ${t.page(page.currentPage)}` : '';
+const title = (type ? tt.typeMetaTitle(label) : tt.metaTitle) + suffix;
+const crumbs: [string, string][] = type ? [[tt.title, '/text'], [label, `/text-type/${type}`]] : [[tt.title, '/text']];
 ---
 
-<Base lang={lang} title={t.text.metaTitle + suffix} description={t.text.metaDesc(texts.length)}>
+<Base
+  lang={lang}
+  title={title}
+  description={tt.metaDesc(texts.length)}
+  crumbs={crumbs}
+  schema={[itemList(lang, page.data.map((x) => `/text-prompt/${x.slug}`))]}
+>
   <div class="wrap pt-10">
-    <p class="label">{t.collection}</p>
-    <h1 class="display mt-2 text-4xl sm:text-6xl">{t.text.title}</h1>
-    <p class="mt-3 max-w-xl text-muted">{t.text.lead(texts.length)}</p>
-    <div class="mt-8 grid border-t border-ink md:grid-cols-2 md:gap-x-10">
+    {
+      type ? (
+        <p class="label">
+          <a href={href(lang, '/text')} class="hover:text-ink">{tt.title}</a> / {tt.crumbType}
+        </p>
+      ) : (
+        <p class="label">{t.collection}</p>
+      )
+    }
+    <h1 class="display mt-2 text-4xl sm:text-6xl">{type ? label : tt.title}</h1>
+    <p class="mt-3 max-w-xl text-muted">{type ? tt.typeLead(page.total, label) : tt.lead(texts.length)}</p>
+
+    <p class="label mt-6">{tt.byType}</p>
+    <div class="mt-2 flex flex-wrap gap-2">
+      <a href={href(lang, '/text')} class:list={['chip', !type && 'chip-on']}>
+        {t.all} <span class="n">{fmt(texts.length)}</span>
+      </a>
       {
-        page.data.map((x, i) => (
-          <a href={href(lang, `/text-prompt/${x.slug}`)} class="row grid grid-cols-[3.25rem_1fr] gap-x-2 px-1">
-            <span class="label pt-1">{pad((page.currentPage - 1) * TEXT_PAGE + i + 1, 4)}</span>
-            <span>
-              <span class="block font-semibold leading-snug">{x.title}</span>
-              <span class="mt-1 line-clamp-2 block text-sm text-muted">{excerpt(x.prompt, 150)}</span>
-              <span class="label mt-1.5 block">{t.text.types[x.type] ?? x.type}{x.forDevs && ` / ${t.text.dev}`}</span>
-            </span>
+        TEXT_FILTERS.filter((f) => textFilterCounts[f]).map((f) => (
+          <a href={href(lang, `/text-type/${f}`)} class:list={['chip', f === type && 'chip-on']}>
+            {labelOf(f)} <span class="n">{fmt(textFilterCounts[f])}</span>
           </a>
         ))
       }
     </div>
-    <Pagination page={page} lang={lang} />
+    <QuickFilter lang={lang} kind="t" />
+
+    <div id="filter-static">
+      <div class="mt-8 grid border-t border-ink md:grid-cols-2 md:gap-x-10">
+        {
+          page.data.map((x, i) => (
+            <a href={href(lang, `/text-prompt/${x.slug}`)} class="row grid grid-cols-[3.25rem_1fr] gap-x-2 px-1">
+              <span class="label pt-1">{pad((page.currentPage - 1) * TEXT_PAGE + i + 1, 4)}</span>
+              <span>
+                <span class="block font-semibold leading-snug">{x.title}</span>
+                <span class="mt-1 line-clamp-2 block text-sm text-muted">{excerpt(x.prompt, 150)}</span>
+                <span class="label mt-1.5 block">{tt.types[x.type] ?? x.type}{x.forDevs && ` / ${tt.dev}`}</span>
+              </span>
+            </a>
+          ))
+        }
+      </div>
+      <Pagination page={page} lang={lang} />
+    </div>
   </div>
 </Base>

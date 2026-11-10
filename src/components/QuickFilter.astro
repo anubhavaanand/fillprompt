@@ -1,0 +1,116 @@
+---
+// Keyword filter for a list page. Typing searches every prompt of this kind (not just the page
+// on screen) through the shared search index, and swaps the paginated list for the matches.
+// Wrap the static list and its pagination in an element with id="filter-static".
+import { ui, href, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+  /** Which rows of /search-index.json to search: 't' text prompts, 'v' video prompts. */
+  kind: 't' | 'v';
+  /** Only rows whose model has this label (videos). */
+  model?: string;
+}
+const { lang, kind, model = '' } = Astro.props;
+const t = ui[lang];
+const cfg = {
+  kind,
+  model,
+  base: href(lang, kind === 't' ? '/text-prompt/' : '/video/'),
+  none: t.filter.none,
+};
+---
+
+<div class="quick-filter mt-5 flex max-w-xl items-stretch" data-cfg={JSON.stringify(cfg)}>
+  <label class="sr-only" for="qf-input">{t.filter.label}</label>
+  <span class="grid w-10 shrink-0 place-items-center border border-r-0 border-ink bg-surface text-muted" aria-hidden="true">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M3 5h18M7 12h10M10 19h4"></path></svg>
+  </span>
+  <input id="qf-input" type="search" autocomplete="off" placeholder={t.filter.placeholder} class="field min-w-0 flex-1 !py-2.5 text-sm" />
+  <span class="qf-count grid min-w-16 place-items-center border border-l-0 border-ink bg-surface px-3 font-mono text-xs text-muted" aria-live="polite"></span>
+</div>
+<div id="filter-results" class="mt-8 hidden border-t border-ink pt-2"></div>
+
+<script is:inline>
+  (() => {
+    const box = document.querySelector('.quick-filter');
+    if (!box) return;
+    const cfg = JSON.parse(box.dataset.cfg);
+    const input = box.querySelector('input');
+    const count = box.querySelector('.qf-count');
+    const results = document.getElementById('filter-results');
+    // Looked up when needed: the static list sits further down the page than this script.
+    const fixedList = () => document.getElementById('filter-static');
+    const MAX = 60;
+    let rows; // loaded on first keystroke
+    const el = (tag, cls, text) => {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    };
+    const load = async () => {
+      if (rows) return rows;
+      const idx = await (await fetch('/search-index.json')).json();
+      rows = idx[cfg.kind] || [];
+      if (cfg.model) rows = rows.filter((r) => r[2] === cfg.model);
+      return rows;
+    };
+    const textRow = ([title, slug]) => {
+      const a = el('a', 'row px-1 !py-3 font-semibold', title);
+      a.href = cfg.base + slug;
+      return a;
+    };
+    const videoCard = ([title, slug, model, poster]) => {
+      const a = el('a', 'tile group block');
+      a.href = cfg.base + slug;
+      const frame = el('span', 'tile-img aspect-video overflow-hidden');
+      if (poster) {
+        const im = el('img', 'h-full w-full object-cover');
+        im.src = poster;
+        im.alt = title;
+        im.loading = 'lazy';
+        im.referrerPolicy = 'no-referrer';
+        im.onerror = () => (im.style.visibility = 'hidden');
+        frame.append(im);
+      }
+      frame.append(el('span', 'absolute bottom-0 left-0 bg-ink px-2 py-1 font-mono text-[10px] uppercase tracking-[0.1em] text-paper', model));
+      a.append(frame, el('span', 'mt-2.5 line-clamp-2 block text-[15px] font-semibold leading-snug', title));
+      return a;
+    };
+    const run = async () => {
+      const words = input.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      if (!words.length) {
+        results.classList.add('hidden');
+        fixedList()?.classList.remove('hidden');
+        count.textContent = '';
+        return;
+      }
+      let all;
+      try {
+        all = await load();
+      } catch {
+        return;
+      }
+      const hits = all.filter((r) => {
+        const hay = (r[0] + ' ' + (r[2] || '') + ' ' + (r[4] || '')).toLowerCase();
+        return words.every((w) => hay.includes(w));
+      });
+      count.textContent = hits.length.toLocaleString('en-US');
+      fixedList()?.classList.add('hidden');
+      results.classList.remove('hidden');
+      results.className =
+        cfg.kind === 'v'
+          ? 'mt-8 grid grid-cols-2 gap-x-5 gap-y-7 border-t border-ink pt-6 md:grid-cols-3 lg:grid-cols-4'
+          : 'mt-8 grid border-t border-ink md:grid-cols-2 md:gap-x-10';
+      results.replaceChildren(
+        ...(hits.length ? hits.slice(0, MAX).map(cfg.kind === 'v' ? videoCard : textRow) : [el('p', 'col-span-full py-6 text-muted', cfg.none)]),
+      );
+    };
+    let timer;
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(run, 140);
+    });
+  })();
+</script>

@@ -1,0 +1,9 @@
+---
+// Video prompts for one AI model. The page body lives in src/views/VideoList.astro.
+import View from '../../../views/VideoList.astro';
+import { videoModelPaths } from '../../../lib/paths';
+
+export const getStaticPaths = ({ paginate }) => videoModelPaths(paginate);
+---
+
+<View lang="en" page={Astro.props.page} model={Astro.params.model} />

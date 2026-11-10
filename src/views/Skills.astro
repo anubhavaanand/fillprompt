@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { skills, sources } from '../lib/data';
+import { skills, communitySkills, sources, fmt } from '../lib/data';
 import { ui, type Lang } from '../i18n';
 
 interface Props {
@@ -10,9 +10,16 @@ const { lang } = Astro.props;
 const t = ui[lang];
 const ts = t.skills;
 const src = sources.anthropic;
+const topics = ['motion', 'design', 'more'].map((k) => [k, communitySkills.filter((s) => s.topic === k)] as const).filter(([, list]) => list.length);
+// Filter groups: all, the official set, then one per community topic.
+const groups: [string, string, number][] = [
+  ['all', ts.groupAll, skills.length + communitySkills.length],
+  ['official', ts.groupOfficial, skills.length],
+  ...topics.map(([k, list]) => [k, ts.topics[k], list.length] as [string, string, number]),
+];
 ---
 
-<Base lang={lang} title={ts.metaTitle} description={ts.metaDesc}>
+<Base lang={lang} title={ts.metaTitle} description={ts.metaDesc} crumbs={[[ts.title, '/skills']]}>
   <div class="wrap pt-10">
     <p class="label">{t.collection}</p>
     <h1 class="display mt-2 text-4xl sm:text-6xl">{ts.title}</h1>
@@ -20,24 +27,137 @@ const src = sources.anthropic;
       {ts.leadA}<code class="bg-mark/50 px-1 font-mono text-sm text-ink">SKILL.md</code>{ts.leadB}
     </p>
 
-    <div class="mt-8 border-t border-ink">
-      {
-        skills.map((s) => (
-          <a href={s.url} target="_blank" rel="noopener noreferrer" class="row grid gap-x-8 gap-y-1 px-1 md:grid-cols-[15rem_1fr_11rem]">
-            <span class="font-mono text-[15px] font-bold">{s.name}/</span>
-            <span class="line-clamp-3 text-sm leading-relaxed text-muted">{s.description}</span>
-            <span class="label md:text-right">
-              {ts.licenses[s.license]}
-              <span class="ml-1 text-ink">↗</span>
-            </span>
-          </a>
-        ))
-      }
+    {/* Filter: group buttons plus a keyword box. Works on the rows already on the page. */}
+    <div id="skill-filter" class="mt-6" data-none={t.filter.none}>
+      <div class="flex flex-wrap gap-2" role="group" aria-label={t.filter.label}>
+        {
+          groups.map(([key, label, count], i) => (
+            <button type="button" data-group={key} aria-pressed={i === 0 ? 'true' : 'false'} class:list={['chip cursor-pointer', i === 0 && 'chip-on']}>
+              {label} <span class="n">{fmt(count)}</span>
+            </button>
+          ))
+        }
+      </div>
+      <div class="mt-3 flex max-w-xl items-stretch">
+        <label class="sr-only" for="skill-q">{t.filter.label}</label>
+        <span class="grid w-10 shrink-0 place-items-center border border-r-0 border-ink bg-surface text-muted" aria-hidden="true">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><path d="M3 5h18M7 12h10M10 19h4"></path></svg>
+        </span>
+        <input id="skill-q" type="search" autocomplete="off" placeholder={t.filter.placeholder} class="field min-w-0 flex-1 !py-2.5 text-sm" />
+        <span id="skill-count" class="grid min-w-16 place-items-center border border-l-0 border-ink bg-surface px-3 font-mono text-xs text-muted" aria-live="polite">
+          {skills.length + communitySkills.length}
+        </span>
+      </div>
+      <p id="skill-none" class="mt-8 hidden text-muted">{t.filter.none}</p>
     </div>
 
-    <p class="mt-6 max-w-2xl text-sm text-muted">
-      {ts.source}: <a href={src.url} target="_blank" rel="noopener noreferrer" class="link font-semibold text-ink">{src.name}</a>
-      {ts.by} {src.by}. {ts.note}
-    </p>
+    <section data-section="official">
+      <div class="sec mt-10">
+        <span class="label">01</span>
+        <h2>{ts.official}</h2>
+      </div>
+      <div class="mt-3">
+        {
+          skills.map((s) => (
+            <a
+              href={s.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-skill="official"
+              data-text={`${s.name} ${s.description}`.toLowerCase()}
+              class="row grid gap-x-8 gap-y-1 px-1 md:grid-cols-[15rem_1fr_11rem]"
+            >
+              <span class="font-mono text-[15px] font-bold">{s.name}/</span>
+              <span class="line-clamp-3 text-sm leading-relaxed text-muted">{s.description}</span>
+              <span class="label md:text-right">
+                {ts.licenses[s.license]}
+                <span class="ml-1 text-ink">↗</span>
+              </span>
+            </a>
+          ))
+        }
+      </div>
+      <p class="mt-6 max-w-2xl text-sm text-muted">
+        {ts.source}: <a href={src.url} target="_blank" rel="noopener noreferrer" class="link font-semibold text-ink">{src.name}</a>
+        {ts.by} {src.by}. {ts.note}
+      </p>
+    </section>
+
+    <section data-section="community">
+      <div class="sec mt-14">
+        <span class="label">02</span>
+        <h2>{ts.community}</h2>
+      </div>
+      <p class="mt-3 max-w-2xl text-muted">{ts.communityLead}</p>
+      {
+        topics.map(([key, list]) => (
+          <section class="mt-8" data-topic={key}>
+            <h3 class="label !text-ink">{ts.topics[key]}</h3>
+            <div class="mt-2 border-t border-ink">
+              {list.map((s) => (
+                <a
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-skill={key}
+                  data-text={`${s.name} ${s.by} ${s.description}`.toLowerCase()}
+                  class="row grid gap-x-8 gap-y-1 px-1 md:grid-cols-[15rem_1fr_11rem]"
+                >
+                  <span>
+                    <span class="block break-words font-mono text-[15px] font-bold">{s.name}/</span>
+                    <span class="label block">{ts.by} {s.by}</span>
+                  </span>
+                  <span class="line-clamp-3 text-sm leading-relaxed text-muted">{s.description}</span>
+                  <span class="label md:text-right">
+                    {s.license} · {ts.stars(s.stars)}
+                    <span class="ml-1 text-ink">↗</span>
+                  </span>
+                </a>
+              ))}
+            </div>
+          </section>
+        ))
+      }
+    </section>
   </div>
 </Base>
+
+<script is:inline>
+  (() => {
+    const root = document.getElementById('skill-filter');
+    if (!root) return;
+    const input = document.getElementById('skill-q');
+    const count = document.getElementById('skill-count');
+    const none = document.getElementById('skill-none');
+    const buttons = [...root.querySelectorAll('button[data-group]')];
+    const rows = [...document.querySelectorAll('a[data-skill]')];
+    let group = 'all';
+    const apply = () => {
+      const words = input.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      let shown = 0;
+      for (const row of rows) {
+        const ok = (group === 'all' || row.dataset.skill === group) && words.every((w) => row.dataset.text.includes(w));
+        row.hidden = !ok;
+        if (ok) shown++;
+      }
+      // Hide a heading when every row under it is hidden.
+      document.querySelectorAll('[data-topic], [data-section]').forEach((sec) => {
+        sec.hidden = !sec.querySelector('a[data-skill]:not([hidden])');
+      });
+      count.textContent = String(shown);
+      none.classList.toggle('hidden', shown > 0);
+    };
+    buttons.forEach((b) =>
+      b.addEventListener('click', () => {
+        group = b.dataset.group;
+        buttons.forEach((x) => {
+          const on = x === b;
+          x.classList.toggle('chip-on', on);
+          x.setAttribute('aria-pressed', String(on));
+        });
+        apply();
+      }),
+    );
+    input.addEventListener('input', apply);
+  })();
+</script>

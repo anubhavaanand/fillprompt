@@ -13,13 +13,14 @@ const cfg = {
   cats: categoryLabels[lang],
   imageBase: href(lang, '/prompt/'),
   textBase: href(lang, '/text-prompt/'),
+  videoBase: href(lang, '/video/'),
   loadFailed: s.loadFailed,
   start: s.start,
   none: s.none,
 };
 ---
 
-<Base lang={lang} title={s.title} description={s.metaDesc}>
+<Base lang={lang} title={s.title} description={s.metaDesc} noindex>
   <div class="wrap pt-10">
     <p class="label">{s.label}</p>
     <h1 class="display mt-2 text-4xl sm:text-6xl">{s.title}</h1>
@@ -33,6 +34,13 @@ const cfg = {
         <h2>{s.images}</h2>
       </div>
       <div id="res-i" class="masonry mt-6"></div>
+    </section>
+    <section id="sec-v" class="hidden pt-10">
+      <div class="sec">
+        <span id="n-v" class="label"></span>
+        <h2>{s.videos}</h2>
+      </div>
+      <div id="res-v" class="mt-6 grid grid-cols-2 gap-x-5 gap-y-7 md:grid-cols-3 lg:grid-cols-4"></div>
     </section>
     <section id="sec-t" class="hidden pt-10">
       <div class="sec">
@@ -81,6 +89,24 @@ const cfg = {
       a.append(frame, cap);
       return a;
     };
+    const videoCard = ([title, slug, model, poster]) => {
+      const a = el('a', 'tile group block');
+      a.href = cfg.videoBase + slug;
+      const frame = el('span', 'tile-img aspect-video overflow-hidden');
+      if (poster) {
+        const im = el('img', 'h-full w-full object-cover');
+        im.src = poster;
+        im.alt = title;
+        im.loading = 'lazy';
+        im.referrerPolicy = 'no-referrer';
+        im.onerror = () => (im.style.visibility = 'hidden');
+        frame.append(im);
+      }
+      const cap = el('span', 'mt-2.5 block');
+      cap.append(el('span', 'line-clamp-2 block text-[15px] font-semibold leading-snug', title), el('span', 'label mt-1 block', model));
+      a.append(frame, cap);
+      return a;
+    };
     const textCard = ([title, slug]) => {
       const a = el('a', 'row px-1 !py-3 font-semibold', title);
       a.href = cfg.textBase + slug;
@@ -93,19 +119,22 @@ const cfg = {
       if (!words.length) {
         $('status').textContent = cfg.start;
         $('sec-i').classList.add('hidden');
+        $('sec-v').classList.add('hidden');
         $('sec-t').classList.add('hidden');
         return;
       }
       const hit = (s) => words.every((w) => s.includes(w));
       const im = idx.i.filter((r) => hit((r[0] + ' ' + (cfg.cats[r[2]] || '') + ' ' + r[4]).toLowerCase()));
+      const vd = (idx.v || []).filter((r) => hit((r[0] + ' ' + r[2] + ' ' + r[4]).toLowerCase()));
       const tx = idx.t.filter((r) => hit(r[0].toLowerCase()));
-      $('status').textContent = im.length + tx.length ? '' : cfg.none + ' "' + input.value.trim() + '".';
+      $('status').textContent = im.length + vd.length + tx.length ? '' : cfg.none + ' "' + input.value.trim() + '".';
       const show = (key, list, card) => {
         $('sec-' + key).classList.toggle('hidden', !list.length);
         $('n-' + key).textContent = list.length > MAX ? `${MAX} / ${list.length}` : String(list.length);
         $('res-' + key).replaceChildren(...list.slice(0, MAX).map(card));
       };
       show('i', im, imageCard);
+      show('v', vd, videoCard);
       show('t', tx, textCard);
     };
     input.value = new URLSearchParams(location.search).get('q') || '';

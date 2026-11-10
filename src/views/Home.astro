@@ -1,8 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
 import ImageCard from '../components/ImageCard.astro';
-import { images, texts, skills, catSlugs, catCounts, excerpt, fmt, pad } from '../lib/data';
+import VideoCard from '../components/VideoCard.astro';
+import { images, texts, videos, skills, communitySkills, catSlugs, catCounts, excerpt, fmt, pad } from '../lib/data';
 import { ui, href, categoryLabels, type Lang } from '../i18n';
+import { COUNTER } from '../lib/counter';
+import { faqSchema } from '../lib/seo';
 
 interface Props {
   lang: Lang;
@@ -24,20 +27,13 @@ const skillPicks = skills.filter((s) => ['pdf', 'pptx', 'xlsx', 'docx', 'fronten
 const words = t.hero.words;
 const stats: [number, string, string][] = [
   [images.length, t.hero.statImages, '/images'],
+  [videos.length, t.hero.statVideos, '/videos'],
   [texts.length, t.hero.statText, '/text'],
-  [skills.length, t.hero.statSkills, '/skills'],
+  [skills.length + communitySkills.length, t.hero.statSkills, '/skills'],
 ];
 ---
 
-<Base lang={lang} title={t.homeTitle}>
-  {
-    lang === 'en' && (
-      <script is:inline>
-        // A visitor who chose Malay before goes straight to the Malay home page.
-        try { if (localStorage.getItem('lang') === 'ms') location.replace('/ms'); } catch {}
-      </script>
-    )
-  }
+<Base lang={lang} title={t.homeTitle} schema={[faqSchema(t.faq.items)]}>
   <section class="border-b border-ink">
     <div class="wrap grid gap-10 py-10 lg:grid-cols-[1.15fr_1fr] lg:gap-14 lg:py-16">
       <div class="flex flex-col justify-center">
@@ -49,22 +45,35 @@ const stats: [number, string, string][] = [
           </span>
           <span class="block">{t.hero.line3}</span>
         </h1>
-        <p class="mt-6 max-w-xl text-lg leading-relaxed text-muted">{t.hero.lead(images.length + texts.length)}</p>
+        <p class="mt-6 max-w-xl text-lg leading-relaxed text-muted">{t.hero.lead(images.length + videos.length + texts.length)}</p>
         <form action={href(lang, '/search')} class="mt-8 flex max-w-xl" role="search">
           <input type="search" name="q" placeholder={t.searchHint} aria-label={t.searchPrompts} class="field min-w-0 flex-1 border-r-0" />
           <button class="btn px-6 text-base">{t.search}</button>
         </form>
-        <dl class="mt-10 grid max-w-xl grid-cols-3 border-t border-ink">
+        {/* Every number rolls in like an odometer. The last one is live: it is read from the copy counter. */}
+        <dl id="stats" class="mt-10 grid grid-cols-2 border-t border-ink sm:grid-cols-5" data-api={COUNTER.url} data-key={COUNTER.key}>
           {
             stats.map(([n, label, path], i) => (
-              <a href={href(lang, path)} class:list={['group block py-4', i > 0 && 'border-l border-line pl-4']}>
-                <dd class="display text-3xl sm:text-4xl">
-                  <span class="group-hover:bg-mark">{fmt(n)}</span>
+              <a href={href(lang, path)} class:list={['stat group block py-4', i > 0 && 'sm:pl-4', i % 2 === 1 && 'max-sm:pl-4']}>
+                <dd class="display text-3xl sm:text-[1.6rem] xl:text-[2.1rem]">
+                  <span class="odo group-hover:bg-mark" data-value={n}>{fmt(n)}</span>
                 </dd>
                 <dt class="label mt-1">{label}</dt>
               </a>
             ))
           }
+          <div class="stat col-span-2 py-4 sm:col-span-1 sm:pl-4">
+            <dd class="display relative inline-block text-3xl sm:text-[1.6rem] xl:text-[2.1rem]">
+              <span id="copied-odo" class="odo">0</span>
+            </dd>
+            <dt class="label mt-1 flex items-center gap-1.5">
+              <span class="relative flex size-2 shrink-0" aria-hidden="true">
+                <span class="live-ping absolute inline-flex size-full rounded-full bg-hot/70" />
+                <span class="relative inline-flex size-2 rounded-full bg-hot" />
+              </span>
+              {t.hero.statCopied}
+            </dt>
+          </div>
         </dl>
       </div>
 
@@ -123,8 +132,21 @@ const stats: [number, string, string][] = [
   </section>
 
   <section class="wrap pt-12">
+    <div class="sec justify-between">
+      <div class="flex items-baseline gap-4">
+        <span class="label">03</span>
+        <h2>{t.secVideos}</h2>
+      </div>
+      <a href={href(lang, '/videos')} class="link text-sm font-semibold">{t.allVideos}</a>
+    </div>
+    <div class="mt-6 grid grid-cols-2 gap-x-5 gap-y-7 md:grid-cols-4">
+      {videos.slice(0, 8).map((v) => <VideoCard v={v} lang={lang} />)}
+    </div>
+  </section>
+
+  <section class="wrap pt-12">
     <div class="sec">
-      <span class="label">03</span>
+      <span class="label">04</span>
       <h2>{t.secCurated}</h2>
     </div>
     <div class="masonry mt-6">
@@ -135,7 +157,7 @@ const stats: [number, string, string][] = [
   <section class="wrap pt-12">
     <div class="sec justify-between">
       <div class="flex items-baseline gap-4">
-        <span class="label">04</span>
+        <span class="label">05</span>
         <h2>{t.secText}</h2>
       </div>
       <a href={href(lang, '/text')} class="link text-sm font-semibold">{t.allText}</a>
@@ -158,10 +180,10 @@ const stats: [number, string, string][] = [
   <section class="wrap pt-16">
     <div class="grid border border-ink bg-surface md:grid-cols-[1fr_1.2fr]">
       <div class="border-b border-ink p-6 sm:p-8 md:border-b-0 md:border-r">
-        <span class="label">05</span>
+        <span class="label">06</span>
         <h2 class="display mt-3 text-3xl sm:text-4xl">{t.skillsTeaser.title}</h2>
         <p class="mt-4 max-w-md leading-relaxed text-muted">{t.skillsTeaser.body}</p>
-        <a href={href(lang, '/skills')} class="btn mt-6">{t.skillsTeaser.cta(skills.length)}</a>
+        <a href={href(lang, '/skills')} class="btn mt-6">{t.skillsTeaser.cta(skills.length + communitySkills.length)}</a>
       </div>
       <ul class="font-mono text-sm">
         {
@@ -177,12 +199,187 @@ const stats: [number, string, string][] = [
       </ul>
     </div>
   </section>
+
+  <section class="wrap pt-16">
+    <div class="sec">
+      <span class="label">07</span>
+      <h2>{t.faq.title}</h2>
+    </div>
+    <div class="mt-2 max-w-3xl">
+      {
+        t.faq.items.map(([q, a]) => (
+          <details class="group border-b border-line">
+            <summary class="flex cursor-pointer list-none items-baseline justify-between gap-4 px-1 py-4 font-semibold hover:bg-mark/60 [&::-webkit-details-marker]:hidden">
+              {q}
+              <span class="font-mono text-muted group-open:hidden" aria-hidden="true">+</span>
+              <span class="hidden font-mono text-muted group-open:inline" aria-hidden="true">−</span>
+            </summary>
+            <p class="px-1 pb-5 leading-relaxed text-muted">{a}</p>
+          </details>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="wrap pt-16">
+    <div class="flex flex-col gap-5 border border-ink bg-mark p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+      <div>
+        <h2 class="display text-2xl sm:text-3xl">{t.support.title}</h2>
+        <p class="mt-2 max-w-xl leading-relaxed">{t.support.body}</p>
+      </div>
+      <a href={href(lang, '/donate')} class="btn shrink-0 hover:!bg-paper"><span class="text-hot" aria-hidden="true">♥</span> {t.support.cta}</a>
+    </div>
+  </section>
 </Base>
 
 <script is:inline define:vars={{ words }}>
+  // Odometer numbers in the stats row. Each digit is a column of 0-9 three times over, resting
+  // on the middle set: it spins a full turn into place on load, rolls forward when the digit
+  // changes (9 to 0 carries on into the next set), then snaps back to the middle set.
+  const ROW = 1.25; // em, the height of one digit
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const odometer = (el) => {
+    const sr = document.createElement('span');
+    sr.className = 'sr-only';
+    const reel = document.createElement('span');
+    reel.className = 'odo-reel';
+    reel.setAttribute('aria-hidden', 'true');
+    el.replaceChildren(sr, reel);
+    el.classList.add('odo-on');
+    const cols = []; // rightmost digit first: { wrap, strip, pos }
+    const place = (c, how) => {
+      c.strip.style.transition = how;
+      c.strip.style.transform = 'translateY(-' + c.pos * ROW + 'em)';
+    };
+    const column = () => {
+      const wrap = document.createElement('span');
+      wrap.className = 'relative inline-block';
+      const ghost = document.createElement('span');
+      ghost.className = 'invisible';
+      ghost.textContent = '0';
+      const strip = document.createElement('span');
+      strip.className = 'absolute inset-x-0 top-0 flex flex-col items-center';
+      for (let n = 0; n < 30; n++) {
+        const d = document.createElement('span');
+        d.style.height = ROW + 'em';
+        d.textContent = String(n % 10);
+        strip.append(d);
+      }
+      wrap.append(ghost, strip);
+      const c = { wrap, strip, pos: 10 };
+      strip.addEventListener('transitionend', () => {
+        if (c.pos < 20) return;
+        c.pos -= 10;
+        place(c, 'none');
+      });
+      place(c, 'none');
+      return c;
+    };
+    // spin: start every digit at 0 and roll a full turn to its value.
+    return (value, spin, delay = 0) => {
+      const text = value.toLocaleString('en-US');
+      const digits = text.replace(/\D/g, '');
+      sr.textContent = text;
+      while (cols.length < digits.length) cols.push(column());
+      const nodes = [];
+      let k = digits.length;
+      for (const ch of text) nodes.push(/\d/.test(ch) ? cols[--k].wrap : document.createTextNode(ch));
+      reel.replaceChildren(...nodes);
+      [...digits].forEach((ch, i) => {
+        const c = cols[digits.length - 1 - i];
+        const digit = Number(ch);
+        if (calm) {
+          c.pos = 10 + digit;
+          return place(c, 'none');
+        }
+        if (spin) {
+          c.pos = 10;
+          place(c, 'none');
+        }
+        const next = spin ? 20 + digit : c.pos + ((digit - (c.pos % 10) + 10) % 10);
+        if (next === c.pos) return;
+        // Two frames, so the starting position is painted before the roll begins.
+        requestAnimationFrame(() =>
+          requestAnimationFrame(() => {
+            c.pos = next;
+            place(c, spin ? 'transform 1500ms cubic-bezier(0.16, 1, 0.3, 1) ' + (delay + i * 80) + 'ms' : 'transform 500ms cubic-bezier(0.16, 1, 0.3, 1)');
+          }),
+        );
+      });
+    };
+  };
+
+  const statsEl = document.getElementById('stats');
+  if (statsEl) {
+    // The four library totals spin in once, one after another, when the row scrolls into view.
+    const fixed = [...statsEl.querySelectorAll('.odo[data-value]')].map((el) => ({ value: Number(el.dataset.value), set: odometer(el) }));
+    const start = () => fixed.forEach((o, i) => o.set(o.value, true, i * 140));
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        start();
+      });
+      io.observe(statsEl);
+    } else start();
+
+    // The live total: spins in once it has loaded, then steps up one real copy at a time with a "+1".
+    const liveEl = document.getElementById('copied-odo');
+    const setLive = odometer(liveEl);
+    setLive(0, false);
+    let shown = 0;
+    let target = 0;
+    let timer;
+    const pop = () => {
+      if (calm) return;
+      const p = document.createElement('span');
+      p.className = 'count-pop pointer-events-none absolute -right-5 -top-1 font-mono text-xs font-bold text-hot';
+      p.setAttribute('aria-hidden', 'true');
+      p.textContent = '+1';
+      liveEl.parentElement.append(p);
+      setTimeout(() => p.remove(), 1200);
+    };
+    const tick = () => {
+      const gap = target - shown;
+      if (gap <= 0) return;
+      if (gap > 20) {
+        shown = target;
+        return setLive(shown, false);
+      }
+      setLive(++shown, false);
+      pop();
+      timer = setTimeout(tick, 700);
+    };
+    let first = true;
+    let last = -Infinity;
+    const load = async () => {
+      if (document.visibilityState !== 'visible' || performance.now() - last < 60000) return;
+      last = performance.now();
+      try {
+        const r = await fetch(statsEl.dataset.api + '/mt_copy_get', { headers: { apikey: statsEl.dataset.key } });
+        const total = Number((await r.json()).total);
+        if (!Number.isFinite(total)) return;
+        if (first) {
+          first = false;
+          shown = target = total;
+          setLive(total, true, fixed.length * 140);
+        } else if (total > target) {
+          target = total;
+          clearTimeout(timer);
+          tick();
+        }
+      } catch {
+        // Offline or blocked: keep what is shown.
+      }
+    };
+    load();
+    setInterval(load, 5 * 60000);
+    document.addEventListener('visibilitychange', load);
+  }
+
   // Rotate the highlighted word in the headline: the blank being filled.
   const el = document.getElementById('rot');
-  if (el && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  if (el && !calm) {
     let i = 0;
     el.style.transition = 'opacity .18s';
     setInterval(() => {

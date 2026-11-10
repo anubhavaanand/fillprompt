@@ -1,11 +1,9 @@
 ---
 // Brand mark: square brackets around a highlighter block, a blank waiting to be filled.
 interface Props {
-  invert?: boolean;
   size?: number;
 }
-const { invert = false, size = 26 } = Astro.props;
-const stroke = invert ? '#f3f0e8' : '#151412';
+const { size = 26 } = Astro.props;
 ---
 
 <span class="inline-flex items-center gap-2">
@@ -14,7 +12,7 @@ const stroke = invert ? '#f3f0e8' : '#151412';
     <path
       d="M12 6.5H7.5v19H12M20 6.5h4.5v19H20"
       fill="none"
-      stroke={stroke}
+      stroke="currentColor"
       stroke-width="3"
       stroke-linecap="square"></path>
   </svg>

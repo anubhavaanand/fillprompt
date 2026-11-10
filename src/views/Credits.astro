@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { sources, images, texts, skills } from '../lib/data';
+import { sources, images, texts, videos, skills, communitySkills } from '../lib/data';
 import { ui, type Lang } from '../i18n';
 
 interface Props {
@@ -14,12 +14,18 @@ const rows: [string, string][] = [
   ['jau123', c.usedImages(count('jau123'))],
   ['youmind', c.usedImages(count('youmind'))],
   ['zerolu', c.usedImages(count('zerolu'))],
+  ['freestylefly', c.usedImages(count('freestylefly'))],
+  ['evolink', c.usedImages(count('evolink'))],
+  ['learnprompt', c.usedVideos(videos.filter((v) => v.source === 'learnprompt').length)],
+  ['youmindseedance', c.usedVideos(videos.filter((v) => v.source === 'youmindseedance').length)],
+  ['oswseedance', c.usedVideos(videos.filter((v) => v.source === 'oswseedance').length)],
+  ['youmindgrok', c.usedVideos(videos.filter((v) => v.source === 'youmindgrok').length)],
   ['promptschat', c.usedText(texts.length)],
   ['anthropic', c.usedSkills(skills.length)],
 ];
 ---
 
-<Base lang={lang} title={c.title} description={c.metaDesc}>
+<Base lang={lang} title={c.title} description={c.metaDesc} crumbs={[[c.title, '/credits']]}>
   <div class="wrap max-w-4xl pt-10">
     <p class="label">{t.about}</p>
     <h1 class="display mt-2 text-4xl sm:text-6xl">{c.title}</h1>
@@ -55,6 +61,8 @@ const rows: [string, string][] = [
       </table>
     </div>
 
+    <p class="mt-4 max-w-2xl text-sm text-muted">{c.communityNote(communitySkills.length)}</p>
+
     <div class="sec mt-14">
       <span class="label">01</span>
       <h2>{c.imagesTitle}</h2>
@@ -67,7 +75,7 @@ const rows: [string, string][] = [
     </div>
     <p class="mt-3 max-w-2xl leading-relaxed text-muted">
       {c.takedownA}
-      <a href="mailto:hello@mytemplate.my" class="link font-semibold text-ink">hello@mytemplate.my</a>
+      <a href="mailto:jupiter.mplayplay@gmail.com" class="link font-semibold text-ink">jupiter.mplayplay@gmail.com</a>
       {c.takedownB}
     </p>
   </div>

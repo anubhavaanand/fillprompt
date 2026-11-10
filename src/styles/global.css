@@ -19,6 +19,59 @@
   --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Menlo, Consolas, monospace;
 }
 
+/* Text that sits on the highlighter yellow is always dark, in both themes. */
+:root {
+  --on-mark: #151412;
+  color-scheme: light;
+}
+
+/*
+  Dark theme: the same palette inverted. Paper becomes near-black, ink becomes warm white,
+  and the highlighter yellow stays exactly as it is.
+*/
+[data-theme='dark'] {
+  --color-paper: #131210;
+  --color-surface: #1c1a17;
+  --color-ink: #f1ede4;
+  --color-muted: #a8a195;
+  --color-line: #3a362f;
+  color-scheme: dark;
+}
+/* Anything painted yellow keeps dark text, including what is inside it. */
+[data-theme='dark'] :is(.bg-mark, .chip:hover, .btn:hover, .hover\:bg-mark:hover, .group:hover .group-hover\:bg-mark, [aria-current='page'].bg-mark) {
+  color: var(--on-mark);
+}
+[data-theme='dark'] .bg-mark :is(.text-muted, .label) {
+  color: #4a463e;
+}
+/* Solid-yellow row hovers are too loud on a dark page: use a tint instead. */
+[data-theme='dark'] :is(.row:hover, .hover\:bg-mark\/60:hover) {
+  background-color: rgb(255 216 61 / 0.13);
+}
+[data-theme='dark'] :is(.field:focus, .focus\:bg-white:focus) {
+  background-color: var(--color-surface);
+}
+/* Yellow buttons that turn paper-coloured on hover need light text again. */
+[data-theme='dark'] :is(.hover\:bg-paper, .hover\:\!bg-paper):hover {
+  color: var(--color-ink) !important;
+}
+/* The footer stays dark in the dark theme instead of flipping to a light block. */
+[data-theme='dark'] footer {
+  --color-ink: #0b0a09;
+  --color-paper: #f1ede4;
+  border-top: 1px solid #3a362f;
+}
+/* Theme toggle icon: moon in the light theme, sun in the dark theme. */
+.icon-sun {
+  display: none;
+}
+[data-theme='dark'] .icon-sun {
+  display: block;
+}
+[data-theme='dark'] .icon-moon {
+  display: none;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -31,7 +84,7 @@ body {
 }
 ::selection {
   background: var(--color-mark);
-  color: var(--color-ink);
+  color: var(--on-mark);
 }
 :focus-visible {
   outline: 2px solid var(--color-ink);
@@ -39,7 +92,7 @@ body {
 }
 mark {
   background: var(--color-mark);
-  color: inherit;
+  color: var(--on-mark);
   padding: 0 0.15em;
 }
 
@@ -106,6 +159,60 @@ mark {
   /* ruled rows used for text prompts, categories and skills */
   .row {
     @apply block border-b border-line py-4 transition-colors hover:bg-mark/60;
+  }
+}
+
+/* live copy counter in the hero: rolling digits, a pulsing dot and a rising "+1" */
+.odo {
+  font-variant-numeric: tabular-nums;
+}
+.odo-on {
+  display: inline-flex;
+  user-select: none;
+}
+.odo-reel {
+  display: inline-flex;
+  height: 1.25em;
+  line-height: 1.25em;
+  overflow: hidden;
+  mask-image: linear-gradient(transparent, #000 18%, #000 82%, transparent);
+}
+/* dividers between the stats: a rule on the left of every stat but the first in its row */
+.stat + .stat {
+  border-left: 1px solid var(--color-line);
+}
+@media (max-width: 639px) {
+  .stat:nth-child(odd) {
+    border-left: 0;
+  }
+  .stat:nth-child(n + 3) {
+    border-top: 1px solid var(--color-line);
+  }
+}
+.live-ping {
+  animation: live-ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+.count-pop {
+  animation: count-pop 1.2s ease-out forwards;
+}
+@keyframes live-ping {
+  75%,
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+@keyframes count-pop {
+  0% {
+    transform: translateY(4px);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-12px);
+    opacity: 0;
   }
 }
 
