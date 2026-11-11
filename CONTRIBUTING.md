@@ -2,7 +2,7 @@
 
 Thanks for helping. fillprompt.com is a small project run by one person, so focused contributions are the easiest to review.
 
-**New here?** Pick an issue labelled [`good first issue`](https://github.com/haritel97/fillprompt/labels/good%20first%20issue): each one says which files to change and how to check the result. Comment on it first so two people do not work on the same thing. For bigger ideas, start a thread in [Discussions](https://github.com/haritel97/fillprompt/discussions) and see the [roadmap](https://github.com/haritel97/fillprompt/discussions/categories/announcements).
+**New here?** Pick an issue labelled [`good first issue`](https://github.com/haritel97/fillprompt/labels/good%20first%20issue): each one says which files to change and how to check the result. Comment on it first so two people do not work on the same thing. For bigger ideas, start a thread in [Discussions](https://github.com/haritel97/fillprompt/discussions) and see the [roadmap](https://github.com/haritel97/fillprompt/discussions/8).
 
 You can expect a first reply to an issue or pull request within two or three days.
 

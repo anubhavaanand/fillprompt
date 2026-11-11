@@ -164,7 +164,7 @@ If you own a prompt or image shown on the site and want it removed, see https://
 
 ## Contributing
 
-Bug reports, fixes and suggestions for new open-source prompt collections are welcome. Start with an issue labelled [`good first issue`](https://github.com/haritel97/fillprompt/labels/good%20first%20issue) or the [roadmap](https://github.com/haritel97/fillprompt/discussions), and see [CONTRIBUTING.md](CONTRIBUTING.md). Everyone taking part is expected to follow the [code of conduct](CODE_OF_CONDUCT.md). To report a security problem privately, see [SECURITY.md](SECURITY.md).
+Bug reports, fixes and suggestions for new open-source prompt collections are welcome. Start with an issue labelled [`good first issue`](https://github.com/haritel97/fillprompt/labels/good%20first%20issue) or the [roadmap](https://github.com/haritel97/fillprompt/discussions/8), and see [CONTRIBUTING.md](CONTRIBUTING.md). Everyone taking part is expected to follow the [code of conduct](CODE_OF_CONDUCT.md). To report a security problem privately, see [SECURITY.md](SECURITY.md).
 
 ### Contributors
 
