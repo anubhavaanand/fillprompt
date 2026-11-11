@@ -25,7 +25,7 @@ export function catalog() {
   for (const p of read('image-prompts.json'))
     items.push({ kind: 'image', ...p, tags: p.cats, media: p.images.slice(0, 2) });
   for (const v of read('video-prompts.json'))
-    items.push({ kind: 'video', ...v, tags: [], media: [v.poster, v.video].filter(Boolean) });
+    items.push({ kind: 'video', ...v, tags: v.cats || [], media: [v.poster, v.video].filter(Boolean) });
   for (const t of read('text-prompts.json'))
     items.push({ kind: 'text', ...t, tags: [t.type, ...(t.forDevs ? ['developer'] : [])], media: [], likes: 0 });
   for (const x of items) {
@@ -137,9 +137,10 @@ export function filters() {
   const count = (list) => list.reduce((a, k) => ((a[k] = (a[k] || 0) + 1), a), {});
   const of = (kind, f) => count(items.filter((x) => x.kind === kind).flatMap(f));
   const cats = of('image', (x) => x.tags);
+  const vcats = of('video', (x) => x.tags);
   return {
     image: { total: items.filter((x) => x.kind === 'image').length, categories: Object.fromEntries(categories.filter((c) => cats[c]).map((c) => [c, cats[c]])), models: of('image', (x) => [x.model]) },
-    video: { total: items.filter((x) => x.kind === 'video').length, models: of('video', (x) => [x.model]) },
+    video: { total: items.filter((x) => x.kind === 'video').length, categories: Object.fromEntries(Object.entries(vcats).filter(([c]) => c)), models: of('video', (x) => [x.model]) },
     text: { total: items.filter((x) => x.kind === 'text').length, categories: of('text', (x) => x.tags), models: of('text', (x) => [x.model]) },
   };
 }

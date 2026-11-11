@@ -253,6 +253,30 @@ const CAT_RULES = [
 ];
 const catFor = (label) => (CAT_RULES.find(([re]) => re.test(label)) || [null, 'creative'])[1];
 
+// Video categories derived from title / description / prompt keywords.
+// Title and description are scored higher than the long prompt text.
+// All patterns use word boundaries to avoid partial matches (e.g. "ad" in "made").
+const VIDEO_CAT_RULES = [
+  [/\banime\b|\banimation\b|\banimated\b|\bcartoon\b|\bmanga\b|\bghibli\b|\bpixar\b|\bclaymation\b|\bstop\s*motion\b|\b3d\s*animation\b/i, 'anime and animation'],
+  [/\bfilm\b|\bmovie\b|\bhollywood\b|\bcinematography\b|\bdrama\b|\bcinema\b|\btheatrical\b/i, 'cinematic'],
+  [/\bproduct\b|\bad\b|\bcommercial\b|\bugc\b|\bshowcase\b|\breview\b|\bunboxing\b|\bbrand\b|\bfashion\b|\bbeauty\b|\bskincare\b/i, 'product and ads'],
+  [/\bnature\b|\btravel\b|\blandscape\b|\bmountain\b|\bocean\b|\bforest\b|\bwildlife\b|\bscenic\b|\bvlog\b|\bjourney\b|\btrip\b|\bdestination\b/i, 'nature and travel'],
+  [/\baction\b|\bfight\b|\bbattle\b|\bchase\b|\bsport\b|\bracing\b|\bexplosion\b|\bcombat\b/i, 'action'],
+];
+const videoCatFor = (title, desc, prompt) => {
+  const scores = {};
+  for (const [, cat] of VIDEO_CAT_RULES) scores[cat] = 0;
+  const count = (re, text) => (text.match(re) || []).length;
+  for (const [re, cat] of VIDEO_CAT_RULES) {
+    const g = new RegExp(re.source, 'gi');
+    scores[cat] += count(g, title) * 3; // title is most specific
+    scores[cat] += count(g, desc) * 2;  // description next
+    scores[cat] += count(g, prompt) * 1; // prompt text is longest, least weight
+  }
+  const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
+  return best[1] > 0 ? best[0] : 'other';
+};
+
 // Keep the site family-friendly.
 // Deliberately strict: a few harmless prompts are dropped as false positives.
 const BLOCK = new RegExp(
@@ -468,6 +492,7 @@ function importLearnPrompt(raw) {
       title: c.titleEn.trim(),
       desc: (c.summaryEn || '').trim(),
       prompt: c.promptFull.trim(),
+      cats: [videoCatFor(c.titleEn, c.summaryEn || '', c.promptFull)],
       poster: c.posterUrl || '',
       video: c.mediaUrl || '',
       model: c.models?.[0] || 'Seedance',
@@ -502,6 +527,7 @@ function importYoumindVideos(md, videoMap, { idParam, model, source, prefix }) {
         title,
         desc,
         prompt: prompt.trim(),
+        cats: [videoCatFor(title, desc, prompt)],
         poster,
         video: videos[id] || '',
         model,
@@ -527,6 +553,7 @@ function importOswSeedance(raw, mirrorRaw) {
       title: x.title.trim(),
       desc: '',
       prompt: x.prompt.trim(),
+      cats: [videoCatFor(x.title, '', x.prompt)],
       poster: mirror[x.id]?.poster || x.video?.thumbnail || '',
       video: mirror[x.id]?.mp4 || x.video?.url || '',
       model: x.model || 'Seedance',
