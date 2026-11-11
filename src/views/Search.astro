@@ -139,29 +139,8 @@ const cfg = {
         label.textContent = cfg.suggest;
         suggest.appendChild(label);
         const seen = new Set();
-        const add = (text) => {
-          if (!text || seen.has(text)) return;
-          seen.add(text);
-          const chip = document.createElement('button');
-          chip.type = 'button';
-          chip.className = 'label border border-ink bg-surface px-2.5 py-1 rounded text-sm hover:bg-mark transition-colors';
-          chip.textContent = text;
-          chip.addEventListener('click', () => {
-            input.value = text;
-            input.dispatchEvent(new Event('input'));
-          });
-          suggest.appendChild(chip);
-        };
-        // Image categories.
-        for (const r of idx.i) {
-          const cat = cfg.cats[r[2]] || r[2];
-          if (cat && !seen.has(cat)) add(cat);
-        }
-        // Video models.
-        for (const r of (idx.v || [])) {
-          if (r[2]) add(r[2]);
-        }
-        // Same search without the last word, if it finds results.
+        const chips = [];
+        // 1. Shorter query first (most likely to help).
         if (words.length > 1) {
           const shorter = words.slice(0, -1).join(' ');
           const hitShort = (s) => words.slice(0, -1).every((w) => s.includes(w));
@@ -169,7 +148,53 @@ const cfg = {
             idx.i.filter((r) => hitShort((r[0] + ' ' + (cfg.cats[r[2]] || '') + ' ' + r[4]).toLowerCase())).length +
             (idx.v || []).filter((r) => hitShort((r[0] + ' ' + r[2] + ' ' + r[4]).toLowerCase())).length +
             idx.t.filter((r) => hitShort(r[0].toLowerCase())).length;
-          if (shorterTotal > 0) add(shorter);
+          if (shorterTotal > 0) {
+            chips.push({ text: shorter, score: 3 });
+            seen.add(shorter);
+          }
+        }
+        // 2. Categories/models whose name shares a word with the query.
+        for (const r of idx.i) {
+          const cat = cfg.cats[r[2]] || r[2];
+          if (cat && !seen.has(cat)) {
+            const score = words.some((w) => cat.toLowerCase().includes(w)) ? 2 : 0;
+            if (score > 0) chips.push({ text: cat, score });
+            seen.add(cat);
+          }
+        }
+        for (const r of (idx.v || [])) {
+          if (r[2] && !seen.has(r[2])) {
+            const score = words.some((w) => r[2].toLowerCase().includes(w)) ? 2 : 0;
+            if (score > 0) chips.push({ text: r[2], score });
+            seen.add(r[2]);
+          }
+        }
+        chips.sort((a, b) => b.score - a.score);
+        // 3. Fill with most popular categories if there is room (max 6 total).
+        const catCounts = {};
+        for (const r of idx.i) {
+          const cat = cfg.cats[r[2]] || r[2];
+          if (cat) catCounts[cat] = (catCounts[cat] || 0) + 1;
+        }
+        const popularCats = Object.entries(catCounts)
+          .filter(([cat]) => !seen.has(cat))
+          .sort((a, b) => b[1] - a[1])
+          .map(([cat]) => cat);
+        for (const cat of popularCats) {
+          if (chips.length >= 6) break;
+          chips.push({ text: cat, score: 1 });
+          seen.add(cat);
+        }
+        for (const chip of chips.slice(0, 6)) {
+          const c = document.createElement('button');
+          c.type = 'button';
+          c.className = 'label border border-ink bg-surface px-2.5 py-1 text-sm hover:bg-mark transition-colors';
+          c.textContent = chip.text;
+          c.addEventListener('click', () => {
+            input.value = chip.text;
+            input.dispatchEvent(new Event('input'));
+          });
+          suggest.appendChild(c);
         }
       }
       const show = (key, list, card) => {
