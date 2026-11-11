@@ -254,19 +254,27 @@ const CAT_RULES = [
 const catFor = (label) => (CAT_RULES.find(([re]) => re.test(label)) || [null, 'creative'])[1];
 
 // Video categories derived from title / description / prompt keywords.
+// Title and description are scored higher than the long prompt text.
+// All patterns use word boundaries to avoid partial matches (e.g. "ad" in "made").
 const VIDEO_CAT_RULES = [
-  [/anime|animation|animated|cartoon|manga|3d|pixar|ghibli|claymation|stop.motion/i, 'anime and animation'],
-  [/cinematic|film|movie|hollywood|camera|cinematography|shot|scene|drama/i, 'cinematic'],
-  [/product|ad|commercial|ugc|showcase|review|unboxing|brand|fashion|beauty|skincare/i, 'product and ads'],
-  [/nature|travel|landscape|mountain|ocean|forest|wildlife|scenic|vlog|journey|trip|destination/i, 'nature and travel'],
-  [/action|fight|battle|chase|sport|car|racing|explosion|dynamic|fight|combat/i, 'action'],
+  [/\banime\b|\banimation\b|\banimated\b|\bcartoon\b|\bmanga\b|\bghibli\b|\bpixar\b|\bclaymation\b|\bstop\s*motion\b|\b3d\s*animation\b/i, 'anime and animation'],
+  [/\bfilm\b|\bmovie\b|\bhollywood\b|\bcinematography\b|\bdrama\b|\bcinema\b|\btheatrical\b/i, 'cinematic'],
+  [/\bproduct\b|\bad\b|\bcommercial\b|\bugc\b|\bshowcase\b|\breview\b|\bunboxing\b|\bbrand\b|\bfashion\b|\bbeauty\b|\bskincare\b/i, 'product and ads'],
+  [/\bnature\b|\btravel\b|\blandscape\b|\bmountain\b|\bocean\b|\bforest\b|\bwildlife\b|\bscenic\b|\bvlog\b|\bjourney\b|\btrip\b|\bdestination\b/i, 'nature and travel'],
+  [/\baction\b|\bfight\b|\bbattle\b|\bchase\b|\bsport\b|\bracing\b|\bexplosion\b|\bcombat\b/i, 'action'],
 ];
 const videoCatFor = (title, desc, prompt) => {
-  const text = (title + ' ' + desc + ' ' + prompt).toLowerCase();
+  const scores = {};
+  for (const [, cat] of VIDEO_CAT_RULES) scores[cat] = 0;
+  const count = (re, text) => (text.match(re) || []).length;
   for (const [re, cat] of VIDEO_CAT_RULES) {
-    if (re.test(text)) return cat;
+    const g = new RegExp(re.source, 'gi');
+    scores[cat] += count(g, title) * 3; // title is most specific
+    scores[cat] += count(g, desc) * 2;  // description next
+    scores[cat] += count(g, prompt) * 1; // prompt text is longest, least weight
   }
-  return 'other';
+  const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
+  return best[1] > 0 ? best[0] : 'other';
 };
 
 // Keep the site family-friendly.
