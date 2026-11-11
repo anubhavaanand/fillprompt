@@ -253,6 +253,22 @@ const CAT_RULES = [
 ];
 const catFor = (label) => (CAT_RULES.find(([re]) => re.test(label)) || [null, 'creative'])[1];
 
+// Video categories derived from title / description / prompt keywords.
+const VIDEO_CAT_RULES = [
+  [/anime|animation|animated|cartoon|manga|3d|pixar|ghibli|claymation|stop.motion/i, 'anime and animation'],
+  [/cinematic|film|movie|hollywood|camera|cinematography|shot|scene|drama/i, 'cinematic'],
+  [/product|ad|commercial|ugc|showcase|review|unboxing|brand|fashion|beauty|skincare/i, 'product and ads'],
+  [/nature|travel|landscape|mountain|ocean|forest|wildlife|scenic|vlog|journey|trip|destination/i, 'nature and travel'],
+  [/action|fight|battle|chase|sport|car|racing|explosion|dynamic|fight|combat/i, 'action'],
+];
+const videoCatFor = (title, desc, prompt) => {
+  const text = (title + ' ' + desc + ' ' + prompt).toLowerCase();
+  for (const [re, cat] of VIDEO_CAT_RULES) {
+    if (re.test(text)) return cat;
+  }
+  return 'other';
+};
+
 // Keep the site family-friendly.
 // Deliberately strict: a few harmless prompts are dropped as false positives.
 const BLOCK = new RegExp(
@@ -468,6 +484,7 @@ function importLearnPrompt(raw) {
       title: c.titleEn.trim(),
       desc: (c.summaryEn || '').trim(),
       prompt: c.promptFull.trim(),
+      cats: [videoCatFor(c.titleEn, c.summaryEn || '', c.promptFull)],
       poster: c.posterUrl || '',
       video: c.mediaUrl || '',
       model: c.models?.[0] || 'Seedance',
@@ -502,6 +519,7 @@ function importYoumindVideos(md, videoMap, { idParam, model, source, prefix }) {
         title,
         desc,
         prompt: prompt.trim(),
+        cats: [videoCatFor(title, desc, prompt)],
         poster,
         video: videos[id] || '',
         model,
@@ -527,6 +545,7 @@ function importOswSeedance(raw, mirrorRaw) {
       title: x.title.trim(),
       desc: '',
       prompt: x.prompt.trim(),
+      cats: [videoCatFor(x.title, '', x.prompt)],
       poster: mirror[x.id]?.poster || x.video?.thumbnail || '',
       video: mirror[x.id]?.mp4 || x.video?.url || '',
       model: x.model || 'Seedance',

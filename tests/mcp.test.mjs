@@ -99,6 +99,20 @@ test('list_filters counts every kind', async () => {
   assert.ok(Object.keys(f.image.categories).length > 0);
 });
 
+test('search_prompts filters video prompts by category', async () => {
+  const f = (await call('list_filters', {})).structuredContent;
+  const cats = Object.keys(f.video.categories);
+  assert.ok(cats.length > 0, 'video categories exist');
+  const r = await call('search_prompts', { type: 'video', category: cats[0], limit: 5 });
+  const { total, results } = r.structuredContent;
+  assert.ok(total > 0, `category ${cats[0]} has video results`);
+  assert.ok(results.length > 0);
+  for (const x of results) {
+    assert.equal(x.type, 'video');
+    assert.ok(x.tags.includes(cats[0]), `result tagged with ${cats[0]}`);
+  }
+});
+
 test('a browser opening the URL is sent to the setup page', async () => {
   const res = await GET(new Request('http://localhost/api/mcp', { headers: { accept: 'text/html' } }));
   assert.equal(res.status, 302);

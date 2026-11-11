@@ -17,7 +17,7 @@ const mcp = createMcpHandler(
         description:
           'Search over 6,700 free, ready-to-copy AI prompts on fillprompt.com: image prompts (GPT Image, Nano Banana, Midjourney and more), video prompts (Seedance, Veo, Kling and more) and text prompts (system prompts, agent prompts, roles). Returns titles, page URLs and short previews; call get_prompt for the full text.',
         inputSchema: z.object({
-          query: z.string().describe('What the prompt should make, in plain words, e.g. "coffee product photo on marble" or "code review agent".'),
+          query: z.string().optional().describe('What the prompt should make, in plain words, e.g. "coffee product photo on marble" or "code review agent".'),
           type: z.enum(KINDS).optional().describe('Only image, video or text prompts.'),
           model: z.string().optional().describe('Only prompts written for this AI model, e.g. "Nano Banana", "Seedance", "Claude". See list_filters.'),
           category: z.string().optional().describe('Image category (e.g. "product-brand", "poster") or text prompt type (e.g. "agent", "developer"). See list_filters.'),
