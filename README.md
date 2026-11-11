@@ -1,10 +1,37 @@
-# fillprompt.com
+<div align="center">
 
-A free library of ready-to-copy AI prompts: image prompts, video prompts and text prompts, each shown with the result it produced, plus a directory of skills for AI agents. No account, no ads, no paywall.
+<a href="https://fillprompt.com"><img src="public/favicon.svg" width="72" height="72" alt="fillprompt logo"></a>
 
-Live site: https://fillprompt.com
+# fillprompt
 
-Every prompt comes from an open-source collection, names its original author and links to its source. Prompts with placeholders such as `[OBJECT]` get input fields, so a visitor fills in the blanks and copies the finished prompt.
+**Free, ready-to-copy AI prompts for images, video and text, each with a sample result.**<br>
+Pick one, fill in the blanks, paste it into ChatGPT, Gemini, Claude or your video model. No account, no ads, no paywall.
+
+[![CI](https://github.com/haritel97/fillprompt/actions/workflows/ci.yml/badge.svg)](https://github.com/haritel97/fillprompt/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-ffd83d.svg)](LICENSE)
+[![MCP Registry](https://img.shields.io/badge/MCP_Registry-com.fillprompt%2Ffillprompt-151412.svg)](https://registry.modelcontextprotocol.io/v0/servers?search=fillprompt)
+[![fillprompt MCP connector](https://glama.ai/mcp/connectors/com.fillprompt/fillprompt/badges/score.svg)](https://glama.ai/mcp/connectors/com.fillprompt/fillprompt)
+
+[**Website**](https://fillprompt.com) · [**MCP server**](https://fillprompt.com/mcp) · [Image prompts](https://fillprompt.com/images) · [Video prompts](https://fillprompt.com/videos) · [Text prompts](https://fillprompt.com/text) · [Agent skills](https://fillprompt.com/skills)
+
+<a href="https://fillprompt.com"><img src=".github/assets/home.jpg" alt="The fillprompt.com home page: AI prompts for product shots, ready to copy" width="100%"></a>
+
+</div>
+
+## What's inside
+
+| | Count | Written for |
+|---|---:|---|
+| Image prompts | 2,149 | Nano Banana, Nano Banana Pro, GPT Image, GPT Image 2 |
+| Video prompts | 906 | Seedance, Seedance 2.0 and 2.5, Grok Imagine |
+| Text prompts | 3,657 | ChatGPT, Claude, Gemini, any model (roles, system prompts, agents) |
+| Agent skills | 67 | Claude Code and other agents (links to their own repositories) |
+
+- **Sample results.** Image and video prompts show the output they produced, loaded from the original collection.
+- **Fill in the blanks.** Placeholders such as `[OBJECT]` or `{argument name="subject"}` become input fields, and the copy button gives the finished prompt.
+- **Credit on every prompt.** Each one names its author, links to the original post and states the collection's license.
+- **Built for agents too.** A free MCP server and a Claude Code plugin let your AI assistant search the library and fill a prompt in for you.
+- **Fast and light.** A static site of about 7,000 pages, with a sitemap per content type and `llms.txt` for AI search.
 
 ## Use it from your AI assistant (MCP)
 
@@ -33,11 +60,14 @@ Or install the plugin, which adds the server plus a `fillprompt` skill:
 { "mcpServers": { "fillprompt": { "url": "https://fillprompt.com/api/mcp" } } }
 ```
 
+<img src=".github/assets/mcp.jpg" alt="The fillprompt MCP setup page" width="100%">
+
 Tools: `search_prompts`, `get_prompt` (full text, fill-in slots, samples and author credit) and `list_filters`. Usage is counted per day, tool and prompt type only (no queries or client details) in Supabase; `npm run stats:mcp` prints the last 30 days, and `supabase/mcp-usage.sql` creates the table. Setup for other clients: [fillprompt.com/mcp](https://fillprompt.com/mcp). The server lives in [`api/`](api) and the plugin in [`plugins/fillprompt`](plugins/fillprompt).
 
 ## Stack
 
-- [Astro](https://astro.build) static site, no server code
+- [Astro](https://astro.build) static site
+- One Vercel Function for the MCP server ([`mcp-handler`](https://www.npmjs.com/package/mcp-handler) on the MCP SDK)
 - [Tailwind CSS](https://tailwindcss.com) v4
 - Hosted on [Vercel](https://vercel.com)
 - Copy counter backed by two Supabase database functions (optional, see below)
@@ -61,10 +91,17 @@ The site runs at http://localhost:4321. The prompt data is already in `src/data/
 | `npm run import` | Rebuild `src/data/*.json` from the files cached in `sources/` |
 | `npm run import:fresh` | Download every source again, then import |
 | `npm run brand` | Regenerate the share image, touch icon and donation QR |
+| `npm test` | Data checks and MCP server tests |
+| `npm run stats:mcp` | MCP usage for the last 30 days |
 
 ## Project layout
 
 ```
+api/                  MCP server (Vercel Function) and the prompt search behind it
+plugins/fillprompt/   Claude Code plugin: MCP config and the fillprompt skill
+.claude-plugin/       Marketplace file, so `/plugin marketplace add haritel97/fillprompt` works
+tests/                Data and MCP tests (node:test)
+supabase/             SQL for the MCP usage counts
 scripts/import.mjs    Downloads the source collections and writes src/data/*.json
 scripts/og.mjs        Renders brand images
 src/data/             Generated prompt data (committed, so the site builds without an import)
