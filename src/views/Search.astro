@@ -17,6 +17,7 @@ const cfg = {
   loadFailed: s.loadFailed,
   start: s.start,
   none: s.none,
+  suggest: s.suggest,
 };
 ---
 
@@ -27,6 +28,7 @@ const cfg = {
     <input id="q" type="search" autofocus placeholder={t.searchHint} aria-label={t.searchPrompts} class="field mt-6 max-w-2xl text-lg" />
     <p class="mt-2 text-sm text-muted">{s.hint}</p>
     <p id="status" class="mt-6 font-mono text-sm text-muted">{s.loading}</p>
+    <div id="suggest" class="mt-4 flex flex-wrap gap-2"></div>
 
     <section id="sec-i" class="hidden pt-6">
       <div class="sec">
@@ -64,6 +66,7 @@ const cfg = {
       $('status').textContent = cfg.loadFailed;
       return;
     }
+    const suggest = $('suggest');
     const el = (tag, cls, text) => {
       const e = document.createElement(tag);
       if (cls) e.className = cls;
@@ -127,7 +130,73 @@ const cfg = {
       const im = idx.i.filter((r) => hit((r[0] + ' ' + (cfg.cats[r[2]] || '') + ' ' + r[4]).toLowerCase()));
       const vd = (idx.v || []).filter((r) => hit((r[0] + ' ' + r[2] + ' ' + r[4]).toLowerCase()));
       const tx = idx.t.filter((r) => hit(r[0].toLowerCase()));
-      $('status').textContent = im.length + vd.length + tx.length ? '' : cfg.none + ' "' + input.value.trim() + '".';
+      const total = im.length + vd.length + tx.length;
+      $('status').textContent = total ? '' : cfg.none + ' "' + input.value.trim() + '".';
+      suggest.replaceChildren();
+      if (!total) {
+        const label = document.createElement('span');
+        label.className = 'text-xs text-muted uppercase tracking-[0.1em]';
+        label.textContent = cfg.suggest;
+        suggest.appendChild(label);
+        const seen = new Set();
+        const chips = [];
+        // 1. Shorter query first (most likely to help).
+        if (words.length > 1) {
+          const shorter = words.slice(0, -1).join(' ');
+          const hitShort = (s) => words.slice(0, -1).every((w) => s.includes(w));
+          const shorterTotal =
+            idx.i.filter((r) => hitShort((r[0] + ' ' + (cfg.cats[r[2]] || '') + ' ' + r[4]).toLowerCase())).length +
+            (idx.v || []).filter((r) => hitShort((r[0] + ' ' + r[2] + ' ' + r[4]).toLowerCase())).length +
+            idx.t.filter((r) => hitShort(r[0].toLowerCase())).length;
+          if (shorterTotal > 0) {
+            chips.push({ text: shorter, score: 3 });
+            seen.add(shorter);
+          }
+        }
+        // 2. Categories/models whose name shares a word with the query.
+        for (const r of idx.i) {
+          const cat = cfg.cats[r[2]] || r[2];
+          if (cat && !seen.has(cat)) {
+            const score = words.some((w) => cat.toLowerCase().includes(w)) ? 2 : 0;
+            if (score > 0) chips.push({ text: cat, score });
+            seen.add(cat);
+          }
+        }
+        for (const r of (idx.v || [])) {
+          if (r[2] && !seen.has(r[2])) {
+            const score = words.some((w) => r[2].toLowerCase().includes(w)) ? 2 : 0;
+            if (score > 0) chips.push({ text: r[2], score });
+            seen.add(r[2]);
+          }
+        }
+        chips.sort((a, b) => b.score - a.score);
+        // 3. Fill with most popular categories if there is room (max 6 total).
+        const catCounts = {};
+        for (const r of idx.i) {
+          const cat = cfg.cats[r[2]] || r[2];
+          if (cat) catCounts[cat] = (catCounts[cat] || 0) + 1;
+        }
+        const popularCats = Object.entries(catCounts)
+          .filter(([cat]) => !seen.has(cat))
+          .sort((a, b) => b[1] - a[1])
+          .map(([cat]) => cat);
+        for (const cat of popularCats) {
+          if (chips.length >= 6) break;
+          chips.push({ text: cat, score: 1 });
+          seen.add(cat);
+        }
+        for (const chip of chips.slice(0, 6)) {
+          const c = document.createElement('button');
+          c.type = 'button';
+          c.className = 'label border border-ink bg-surface px-2.5 py-1 text-sm hover:bg-mark transition-colors';
+          c.textContent = chip.text;
+          c.addEventListener('click', () => {
+            input.value = chip.text;
+            input.dispatchEvent(new Event('input'));
+          });
+          suggest.appendChild(c);
+        }
+      }
       const show = (key, list, card) => {
         $('sec-' + key).classList.toggle('hidden', !list.length);
         $('n-' + key).textContent = list.length > MAX ? `${MAX} / ${list.length}` : String(list.length);
