@@ -33,7 +33,7 @@ Or install the plugin, which adds the server plus a `fillprompt` skill:
 { "mcpServers": { "fillprompt": { "url": "https://fillprompt.com/api/mcp" } } }
 ```
 
-Tools: `search_prompts`, `get_prompt` (full text, fill-in slots, samples and author credit) and `list_filters`. Setup for other clients: [fillprompt.com/mcp](https://fillprompt.com/mcp). The server lives in [`api/`](api) and the plugin in [`plugins/fillprompt`](plugins/fillprompt).
+Tools: `search_prompts`, `get_prompt` (full text, fill-in slots, samples and author credit) and `list_filters`. Usage is counted per day, tool and prompt type only (no queries or client details) in Supabase; `npm run stats:mcp` prints the last 30 days, and `supabase/mcp-usage.sql` creates the table. Setup for other clients: [fillprompt.com/mcp](https://fillprompt.com/mcp). The server lives in [`api/`](api) and the plugin in [`plugins/fillprompt`](plugins/fillprompt).
 
 ## Stack
 
@@ -112,6 +112,10 @@ The Skills page also links to community skill repositories; only their names, de
 - A video prompt is listed only when it has both a playable clip and its prompt.
 - The import applies a keyword filter (`BLOCK` in `scripts/import.mjs`) to keep the site family-friendly. It is deliberately strict and reads prompt text only, not images.
 - Titles for the jau123 collection are derived from the first line of each prompt.
+
+## Tests
+
+`npm test` checks the data (unique slugs, required fields, valid redirects) and calls every MCP tool through the real handler. GitHub Actions runs the tests and a full build on every push and pull request.
 
 ## Copy counter
 

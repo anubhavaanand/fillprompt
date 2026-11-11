@@ -3,6 +3,7 @@
 import { createMcpHandler } from 'mcp-handler';
 import { z } from 'zod';
 import { search, find, slots, credit, summary, filters, KINDS, SITE } from './_catalog.js';
+import { recordUsage } from './_usage.js';
 
 const json = (data) => ({ content: [{ type: 'text', text: JSON.stringify(data, null, 2) }], structuredContent: data });
 const readOnly = { readOnlyHint: true, openWorldHint: false };
@@ -26,6 +27,7 @@ const mcp = createMcpHandler(
       },
       async (args) => {
         const { total, results } = search(args);
+        recordUsage('search_prompts', args.type, total === 0);
         return json({ total, results: results.map(summary) });
       },
     );
@@ -44,6 +46,7 @@ const mcp = createMcpHandler(
       },
       async ({ ref, type }) => {
         const x = find(ref, type);
+        recordUsage('get_prompt', x?.kind);
         if (!x) return { isError: true, content: [{ type: 'text', text: `No prompt found for "${ref}". Use search_prompts to find one.` }] };
         return json({
           title: x.title,
@@ -68,7 +71,10 @@ const mcp = createMcpHandler(
         inputSchema: z.object({}),
         annotations: readOnly,
       },
-      async () => json(filters()),
+      async () => {
+        recordUsage('list_filters');
+        return json(filters());
+      },
     );
   },
   {
