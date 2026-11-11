@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import Logo from '../components/Logo.astro';
+import Analytics from '@vercel/analytics/astro';
 import { ui, href, barePath, type Lang } from '../i18n';
 import { SITE, url } from '../lib/seo';
 
@@ -18,6 +19,8 @@ interface Props {
 const { lang, title, noindex = false, crumbs = [], schema = [] } = Astro.props;
 const image = Astro.props.image ?? new URL('/og.png', Astro.site).href;
 const t = ui[lang];
+const REPO_SLUG = 'haritel97/fillprompt';
+const REPO = `https://github.com/${REPO_SLUG}`;
 const description = Astro.props.description ?? t.siteDesc;
 // Long titles drop the site suffix so the page's own words fit in a search result.
 const fullTitle = title.includes('fillprompt') || title.length > 48 ? title : `${title} · fillprompt.com`;
@@ -123,6 +126,8 @@ const isOn = (p: string) =>
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" href="/sitemap.xml" />
     <link rel="help" type="text/plain" href="/llms.txt" title="llms.txt" />
+    {/* Vercel Web Analytics: cookieless page-view counts, served first-party by Vercel. */}
+    <Analytics />
     {!noindex && ld.map((json) => <script type="application/ld+json" set:html={json} />)}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -131,7 +136,7 @@ const isOn = (p: string) =>
       rel="stylesheet"
     />
   </head>
-  <body class="flex min-h-screen flex-col">
+  <body class="flex min-h-screen flex-col" data-repo={REPO_SLUG}>
     <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:bg-mark focus:px-3 focus:py-2 focus:text-sm focus:font-bold">{t.skip}</a>
     <header class="sticky top-0 z-20 border-b border-ink bg-paper">
       <div class="wrap flex h-14 items-center gap-4 sm:gap-6">
@@ -161,6 +166,21 @@ const isOn = (p: string) =>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="m20 20-4.5-4.5"></path></svg>
           </button>
         </form>
+        {/* Hidden until the GitHub API confirms the repository is public; then shows the live star count. */}
+        <a
+          href={REPO}
+          target="_blank"
+          rel="noopener"
+          class="gh-only hidden h-9 shrink-0 items-stretch border border-ink text-sm font-semibold transition-colors hover:bg-mark sm:flex"
+          data-label={t.github.starLabel('{n}')}
+          hidden
+        >
+          <span class="flex items-center gap-1.5 px-2.5">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.4-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z"></path></svg>
+            <span class="hidden lg:inline">{t.github.star}</span>
+          </span>
+          <span class="gh-stars flex items-center border-l border-ink bg-surface px-2.5 font-mono text-xs">0</span>
+        </a>
         <button
           type="button"
           id="theme-toggle"
@@ -214,6 +234,7 @@ const isOn = (p: string) =>
             <li><a class="hover:text-mark" href={href(lang, '/credits')}>{t.footer.sources}</a></li>
             <li><a class="hover:text-mark" href={href(lang, '/credits') + '#removal'}>{t.footer.takedown}</a></li>
             <li><a class="hover:text-mark" href={href(lang, '/donate')}><span class="text-hot" aria-hidden="true">♥</span> {t.footer.donate}</a></li>
+            <li class="gh-only" hidden><a class="hover:text-mark" href={REPO} target="_blank" rel="noopener">{t.github.source}</a></li>
           </ul>
         </div>
       </div>
@@ -234,6 +255,35 @@ const isOn = (p: string) =>
           btn.title = label;
           document.querySelector('meta[name="theme-color"]')?.setAttribute('content', dark ? '#131210' : '#f3f0e8');
         };
+        // GitHub stars: ask the public API (cached for an hour per visitor). A private or
+        // missing repository answers 404, so the links stay hidden until it is public.
+        (async () => {
+          const els = document.querySelectorAll('.gh-only');
+          if (!els.length) return;
+          let n = null;
+          try {
+            const c = JSON.parse(localStorage.getItem('gh-stars') || 'null');
+            if (c && Date.now() - c.t < 3600000) n = c.n;
+          } catch {}
+          if (n === null) {
+            try {
+              const r = await fetch('https://api.github.com/repos/' + document.body.dataset.repo);
+              if (r.ok) n = (await r.json()).stargazers_count;
+              else if (r.status === 404) n = -1;
+              try {
+                if (n !== null) localStorage.setItem('gh-stars', JSON.stringify({ n, t: Date.now() }));
+              } catch {}
+            } catch {}
+          }
+          if (n === null || n < 0) return;
+          const text = n >= 1000 ? (n / 1000).toFixed(n >= 10000 ? 0 : 1) + 'k' : String(n);
+          els.forEach((el) => {
+            el.hidden = false;
+            el.querySelectorAll('.gh-stars').forEach((s) => (s.textContent = text));
+            if (el.dataset.label) el.setAttribute('aria-label', el.dataset.label.replace('{n}', n.toLocaleString('en-US')));
+          });
+        })();
+
         btn.addEventListener('click', () => {
           root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
           try {
