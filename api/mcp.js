@@ -2,7 +2,7 @@
 // fillprompt.com. Stateless Streamable HTTP at https://fillprompt.com/api/mcp, read-only, no sign-in.
 import { createMcpHandler } from 'mcp-handler';
 import { z } from 'zod';
-import { search, find, slots, credit, summary, filters, KINDS, SITE } from './_catalog.js';
+import { search, find, random, slots, credit, summary, filters, KINDS, SITE } from './_catalog.js';
 import { recordUsage } from './_usage.js';
 
 const json = (data) => ({ content: [{ type: 'text', text: JSON.stringify(data, null, 2) }], structuredContent: data });
@@ -74,6 +74,38 @@ const mcp = createMcpHandler(
       async () => {
         recordUsage('list_filters');
         return json(filters());
+      },
+    );
+
+    server.registerTool(
+      'random_prompt',
+      {
+        title: 'Random prompt',
+        description:
+          'Get one random fillprompt.com prompt, with its fill-in slots, sample media and credit. Optionally filter by type (image, video or text), AI model or category. Good for "surprise me" or "give me an idea" requests.',
+        inputSchema: z.object({
+          type: z.enum(KINDS).optional().describe('Only image, video or text prompts.'),
+          model: z.string().optional().describe('Only prompts written for this AI model, e.g. "Nano Banana", "Seedance", "Claude". See list_filters.'),
+          category: z.string().optional().describe('Image category (e.g. "product-brand", "poster") or text prompt type (e.g. "agent", "developer"). See list_filters.'),
+        }),
+        annotations: readOnly,
+      },
+      async (args) => {
+        const x = random(args);
+        if (!x) return { isError: true, content: [{ type: 'text', text: 'No prompt matches those filters.' }] };
+        recordUsage('random_prompt', x.kind);
+        return json({
+          title: x.title,
+          type: x.kind,
+          model: x.model,
+          tags: x.tags,
+          url: x.url,
+          ...(x.desc ? { description: x.desc } : {}),
+          prompt: x.prompt,
+          slots: slots(x.prompt),
+          media: x.media,
+          credit: credit(x),
+        });
       },
     );
   },

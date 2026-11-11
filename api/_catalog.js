@@ -88,6 +88,22 @@ export function find(ref, type) {
   }
 }
 
+/** Pick one random prompt matching the same filters as search(). Returns null when nothing matches. */
+export function random({ type, model, category } = {}) {
+  const { items } = catalog();
+  const m = norm(model);
+  const c = norm(category);
+  const pool = [];
+  for (const x of items) {
+    if (type && x.kind !== type) continue;
+    if (m && !norm(x.model).includes(m)) continue;
+    if (c && !x.tags.some((t) => norm(t) === c)) continue;
+    pool.push(x);
+  }
+  if (!pool.length) return null;
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
 /** Fill-in slots in a prompt: {argument name="x" default="y"}, ${name:default}, [PLACEHOLDER] and {placeholder}. */
 export function slots(prompt) {
   const out = new Map();

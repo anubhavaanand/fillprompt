@@ -39,7 +39,7 @@ test('initialize names the server', async () => {
 
 test('tools/list has the three read-only tools', async () => {
   const { tools } = await rpc('tools/list');
-  assert.deepEqual(tools.map((t) => t.name).sort(), ['get_prompt', 'list_filters', 'search_prompts']);
+  assert.deepEqual(tools.map((t) => t.name).sort(), ['get_prompt', 'list_filters', 'random_prompt', 'search_prompts']);
   for (const t of tools) assert.equal(t.annotations?.readOnlyHint, true, `${t.name} is read-only`);
 });
 
@@ -97,6 +97,17 @@ test('list_filters counts every kind', async () => {
   const f = (await call('list_filters', {})).structuredContent;
   for (const k of ['image', 'video', 'text']) assert.ok(f[k].total > 0, `${k} has prompts`);
   assert.ok(Object.keys(f.image.categories).length > 0);
+});
+
+test('random_prompt returns a prompt matching the filter', async () => {
+  const r = await call('random_prompt', { type: 'video' });
+  assert.ok(!r.isError, `random_prompt failed: ${JSON.stringify(r)}`);
+  assert.equal(r.structuredContent.type, 'video');
+});
+
+test('random_prompt reports nothing when no match', async () => {
+  const r = await call('random_prompt', { model: 'DefinitelyNotARealModel' });
+  assert.equal(r.isError, true);
 });
 
 test('a browser opening the URL is sent to the setup page', async () => {
