@@ -2,7 +2,7 @@
 import { href, type Lang } from '../i18n';
 import { excerpt, type ImagePrompt, type TextPrompt, type VideoPrompt, type Source } from './data';
 
-export const SITE = 'https://mytemplate.my';
+export const SITE = 'https://fillprompt.com';
 /** The day the site was built: used where a source gives no date of its own. */
 export const BUILD_DATE = new Date().toISOString().slice(0, 10);
 

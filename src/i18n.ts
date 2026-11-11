@@ -69,7 +69,7 @@ const en = {
     strip: 'Free · no account · open source',
   },
 
-  homeTitle: 'mytemplate.my · Ready-made AI prompts, free',
+  homeTitle: 'fillprompt.com · Ready-made AI prompts, free',
   hero: {
     label: 'Open-source collection · free',
     line1: 'AI prompts for',
@@ -211,8 +211,8 @@ const en = {
     title: 'Questions and answers',
     items: [
       [
-        'What is mytemplate.my?',
-        'mytemplate.my is a free library of ready-made AI prompts for generating images, making videos and writing with AI, plus skills for AI agents. Every prompt comes from an open-source collection, names its original author and, where there is one, shows the result it produced.',
+        'What is fillprompt.com?',
+        'fillprompt.com is a free library of ready-made AI prompts for generating images, making videos and writing with AI, plus skills for AI agents. Every prompt comes from an open-source collection, names its original author and, where there is one, shows the result it produced.',
       ],
       [
         'Is it really free?',
@@ -235,15 +235,15 @@ const en = {
 
   support: {
     title: 'Enjoying the prompts?',
-    body: 'mytemplate.my is free with no account and no ads. A small donation helps cover the domain and hosting.',
+    body: 'fillprompt.com is free with no account and no ads. A small donation helps cover the domain and hosting.',
     cta: 'Support this site',
   },
 
   donate: {
     label: 'Support',
-    metaTitle: 'Support mytemplate.my · Donate',
-    metaDesc: 'mytemplate.my is free, with no account and no ads. If it saved you time, support it with a small donation via DuitNow QR or Ko-fi.',
-    h1a: 'Keep mytemplate.my',
+    metaTitle: 'Support fillprompt.com · Donate',
+    metaDesc: 'fillprompt.com is free, with no account and no ads. If it saved you time, support it with a small donation via DuitNow QR or Ko-fi.',
+    h1a: 'Keep fillprompt.com',
     h1b: 'free for everyone',
     intro: 'No account, no ads, no paywall. If a prompt here saved you time, a small donation helps cover the domain, hosting and the work of adding new prompts.',
     thanks: 'Terima kasih!',
@@ -278,8 +278,8 @@ const en = {
 
   credits: {
     title: 'Sources, licenses & credits',
-    metaDesc: 'The open-source projects behind the content on mytemplate.my, with their licenses.',
-    lead: 'The content on mytemplate.my is collected from the open-source projects below. Every prompt shows its original author and a link to its source. Some titles are shortened and categories regrouped; prompt text is unchanged.',
+    metaDesc: 'The open-source projects behind the content on fillprompt.com, with their licenses.',
+    lead: 'The content on fillprompt.com is collected from the open-source projects below. Every prompt shows its original author and a link to its source. Some titles are shortened and categories regrouped; prompt text is unchanged.',
     thCollection: 'Collection',
     thBy: 'By',
     thLicense: 'License',
@@ -291,7 +291,7 @@ const en = {
     communityNote: (c: number) => `The Skills page also links to ${n(c)} community skill repositories. Only their names, descriptions and licenses are shown; the skills themselves stay in their own repositories.`,
     perSkill: 'Per-skill license',
     imagesTitle: 'About the sample images',
-    imagesBody: 'Sample images and video clips are displayed directly from the original collections’ servers and remain the property of their authors. mytemplate.my does not store copies of them.',
+    imagesBody: 'Sample images and video clips are displayed directly from the original collections’ servers and remain the property of their authors. fillprompt.com does not store copies of them.',
     takedownTitle: 'Request content removal',
     takedownA: 'If you own a prompt or image and want it removed, email',
     takedownB: 'with the link to the page. We will remove it as soon as possible.',

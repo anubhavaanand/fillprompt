@@ -20,7 +20,11 @@ const popular = byLikes.slice(0, 12);
 // Skip prompts about people: the hero should not show a real person's likeness.
 const heroCats = ['product-brand', 'food-drink', 'poster', 'infographic-ui'];
 const people = /\b(portrait|selfie|woman|women|man|men|girl|boy|face|faces|person|people|celebrit\w+|model|actor|actress|singer|rapper|player)\b/i;
-const hero = heroCats.map((c) => byLikes.find((p) => p.cats[0] === c && !people.test(p.prompt))).filter(Boolean);
+// Each tile cycles through a small pool from its category; the first entry is rendered statically.
+const heroPools = heroCats
+  .map((c) => byLikes.filter((p) => p.cats[0] === c && p.images[0] && !people.test(p.prompt)).slice(0, 6))
+  .filter((pool) => pool.length);
+const hero = heroPools.map((pool) => pool[0]);
 const curated = images.filter((p) => p.source !== 'jau123').slice(0, 8);
 const textPicks = texts.slice(0, 8);
 const skillPicks = skills.filter((s) => ['pdf', 'pptx', 'xlsx', 'docx', 'frontend-design', 'canvas-design'].includes(s.name));
@@ -77,21 +81,31 @@ const stats: [number, string, string][] = [
         </dl>
       </div>
 
-      <div class="grid grid-cols-2 gap-3 self-center">
+      {/* Hero sheet: the tiles take turns swapping to another prompt from the same category. */}
+      <div id="hero-sheet" class="grid grid-cols-2 gap-3 self-center">
         {
           hero.map((p, i) => (
-            <a href={href(lang, `/prompt/${p.slug}`)} class="tile group relative block">
+            <a
+              href={href(lang, `/prompt/${p.slug}`)}
+              class="tile hero-tile group relative block"
+              data-pool={JSON.stringify(heroPools[i].map((x) => [href(lang, `/prompt/${x.slug}`), x.images[0], x.title]))}
+            >
               <span class="tile-img aspect-square overflow-hidden">
                 <img
                   src={p.images[0]}
                   alt={p.title}
                   referrerpolicy="no-referrer"
-                  class="h-full w-full object-cover"
+                  class="hero-layer is-front"
                   onerror="this.style.visibility='hidden'"
                 />
-                <span class="absolute left-0 top-0 bg-ink px-2 py-1 font-mono text-[11px] text-paper">{pad(i + 1)}</span>
-                <span class="absolute inset-x-0 bottom-0 bg-paper/95 px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em]">
+                <img alt="" referrerpolicy="no-referrer" class="hero-layer" aria-hidden="true" />
+                <span class="absolute left-0 top-0 z-10 bg-ink px-2 py-1 font-mono text-[11px] text-paper">
+                  {pad(i + 1)}
+                  <span class="hero-count opacity-60" />
+                </span>
+                <span class="absolute inset-x-0 bottom-0 z-10 bg-paper/95 px-2.5 py-1.5 font-mono text-[11px] uppercase tracking-[0.1em]">
                   {cat[p.cats[0]]}
+                  <span class="hero-bar" aria-hidden="true" />
                 </span>
               </span>
             </a>
@@ -390,5 +404,74 @@ const stats: [number, string, string][] = [
         el.style.opacity = '1';
       }, 180);
     }, 2400);
+  }
+
+  // Hero sheet: every few seconds the next tile in turn wipes up to another prompt
+  // from its category. Pauses while hovered or when the tab is hidden.
+  const sheet = document.getElementById('hero-sheet');
+  if (sheet && !calm) {
+    const tiles = [...sheet.querySelectorAll('.hero-tile')]
+      .map((a) => ({ a, pool: JSON.parse(a.dataset.pool || '[]'), at: 0, layers: [...a.querySelectorAll('.hero-layer')] }))
+      .filter((t) => t.pool.length > 1);
+    const STEP = 2400;
+    let turn = 0;
+    let busy = false;
+    let hovered = false;
+    sheet.addEventListener('mouseenter', () => (hovered = true));
+    sheet.addEventListener('mouseleave', () => (hovered = false));
+    sheet.addEventListener('focusin', () => (hovered = true));
+    sheet.addEventListener('focusout', () => (hovered = false));
+    const count = (t) => {
+      const c = t.a.querySelector('.hero-count');
+      if (c) c.textContent = ' · ' + (t.at + 1) + '/' + t.pool.length;
+    };
+    tiles.forEach(count);
+    const load = (img, src) =>
+      new Promise((ok, fail) => {
+        img.onload = () => ok();
+        img.onerror = () => fail();
+        img.style.visibility = '';
+        img.src = src;
+      });
+    const swap = async (t) => {
+      // Try the following entries until one loads; drop any that fail.
+      const back = t.layers.find((l) => !l.classList.contains('is-front'));
+      const front = t.layers.find((l) => l.classList.contains('is-front'));
+      for (let tries = 0; tries < t.pool.length - 1; tries++) {
+        const next = (t.at + 1) % t.pool.length;
+        const [link, src, title] = t.pool[next];
+        try {
+          await load(back, src);
+        } catch {
+          t.pool.splice(next, 1);
+          if (t.pool.length < 2) return;
+          continue;
+        }
+        t.at = next;
+        back.alt = title;
+        back.removeAttribute('aria-hidden');
+        front.alt = '';
+        front.setAttribute('aria-hidden', 'true');
+        t.a.href = link;
+        tiles.forEach((o) => o.a.classList.toggle('is-live', o === t));
+        // The outgoing image stays whole underneath until the wipe has covered it.
+        front.classList.add('is-under');
+        front.classList.remove('is-front');
+        back.classList.add('is-front');
+        setTimeout(() => front.classList.remove('is-under'), 900);
+        t.a.classList.remove('is-running');
+        void t.a.offsetWidth; // restart the progress bar
+        t.a.classList.add('is-running');
+        count(t);
+        return;
+      }
+    };
+    setInterval(async () => {
+      if (busy || hovered || document.visibilityState !== 'visible' || !tiles.length) return;
+      busy = true;
+      await swap(tiles[turn % tiles.length]);
+      turn++;
+      busy = false;
+    }, STEP);
   }
 </script>

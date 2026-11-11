@@ -20,7 +20,7 @@ const image = Astro.props.image ?? new URL('/og.png', Astro.site).href;
 const t = ui[lang];
 const description = Astro.props.description ?? t.siteDesc;
 // Long titles drop the site suffix so the page's own words fit in a search result.
-const fullTitle = title.includes('mytemplate') || title.length > 48 ? title : `${title} · mytemplate.my`;
+const fullTitle = title.includes('fillprompt') || title.length > 48 ? title : `${title} · fillprompt.com`;
 // No trailing slash: the host redirects /images/ to /images, and the canonical must name the final URL.
 const bare = barePath(Astro.url.pathname).replace(/(.)\/+$/, '$1');
 const abs = (l: Lang) => new URL(href(l, bare), Astro.site);
@@ -38,7 +38,7 @@ if (bare === '/') {
     {
       '@context': 'https://schema.org',
       '@type': 'WebSite',
-      name: 'mytemplate.my',
+      name: 'fillprompt.com',
       url: url(lang, '/'),
       inLanguage: lang,
       description,
@@ -53,7 +53,7 @@ if (bare === '/') {
       '@context': 'https://schema.org',
       '@type': 'Organization',
       '@id': `${SITE}/#org`,
-      name: 'mytemplate.my',
+      name: 'fillprompt.com',
       url: SITE,
       logo: `${SITE}/apple-touch-icon.png`,
       description: ui.en.siteDesc,
@@ -65,7 +65,7 @@ if (crumbs.length) {
   graphs.push({
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: [['mytemplate.my', '/'], ...crumbs].map(([name, path], i) => ({
+    itemListElement: [['fillprompt.com', '/'], ...crumbs].map(([name, path], i) => ({
       '@type': 'ListItem',
       position: i + 1,
       name,
@@ -107,7 +107,7 @@ const isOn = (p: string) =>
         </>
       )
     }
-    <meta property="og:site_name" content="mytemplate.my" />
+    <meta property="og:site_name" content="fillprompt.com" />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
@@ -135,7 +135,7 @@ const isOn = (p: string) =>
     <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-50 focus:bg-mark focus:px-3 focus:py-2 focus:text-sm focus:font-bold">{t.skip}</a>
     <header class="sticky top-0 z-20 border-b border-ink bg-paper">
       <div class="wrap flex h-14 items-center gap-4 sm:gap-6">
-        <a href={href(lang, '/')} aria-label={`mytemplate.my, ${t.home}`}><Logo /></a>
+        <a href={href(lang, '/')} aria-label={`fillprompt.com, ${t.home}`}><Logo /></a>
         <nav class="hidden items-center gap-5 md:flex" aria-label={t.navLabel}>
           {
             nav.map(([p, label]) => (

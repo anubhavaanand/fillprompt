@@ -1,8 +1,8 @@
 {
-  "name": "mytemplate.my",
+  "name": "fillprompt",
   "version": "0.1.0",
   "description": "A free library of ready-to-copy AI prompts for images, video and text, plus agent skills.",
-  "homepage": "https://mytemplate.my",
+  "homepage": "https://fillprompt.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/haritel97/mytemplate.my.git"

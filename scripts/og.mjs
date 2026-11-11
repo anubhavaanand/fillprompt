@@ -20,7 +20,7 @@ const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" vi
   <rect width="1200" height="630" fill="${PAPER}"/>
   <rect width="1200" height="14" fill="${INK}"/>
   <g transform="translate(80 84) scale(2.6)">${mark(INK)}</g>
-  <text x="178" y="143" font-family="${SANS}" font-weight="800" font-size="46" fill="${INK}">mytemplate.my</text>
+  <text x="178" y="143" font-family="${SANS}" font-weight="800" font-size="46" fill="${INK}">fillprompt.com</text>
   <text x="80" y="310" font-family="${SANS}" font-weight="800" font-size="104" letter-spacing="-4" fill="${INK}">AI prompts,</text>
   <rect x="72" y="342" width="770" height="128" fill="${MARK}"/>
   <text x="80" y="440" font-family="${SANS}" font-weight="800" font-size="104" letter-spacing="-4" fill="${INK}">ready to copy.</text>
@@ -39,7 +39,7 @@ const cover = `<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="600"
   <rect width="1800" height="16" fill="${INK}"/>
   <rect y="584" width="1800" height="16" fill="${INK}"/>
   <g transform="translate(470 204) scale(6)">${mark(INK)}</g>
-  <text x="690" y="318" font-family="${SANS}" font-weight="800" font-size="104" letter-spacing="-4" fill="${INK}">mytemplate.my</text>
+  <text x="690" y="318" font-family="${SANS}" font-weight="800" font-size="104" letter-spacing="-4" fill="${INK}">fillprompt.com</text>
   <rect x="686" y="352" width="490" height="58" fill="${MARK}"/>
   <text x="698" y="394" font-family="${MONO}" font-size="30" letter-spacing="2" fill="${INK}">AI PROMPTS, READY TO COPY</text>
 </svg>`;

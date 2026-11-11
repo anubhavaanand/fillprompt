@@ -8,10 +8,32 @@
       "has": [
         {
           "type": "host",
+          "value": "www.fillprompt.com"
+        }
+      ],
+      "destination": "https://fillprompt.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "mytemplate.my"
+        }
+      ],
+      "destination": "https://fillprompt.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
           "value": "www.mytemplate.my"
         }
       ],
-      "destination": "https://mytemplate.my/:path*",
+      "destination": "https://fillprompt.com/:path*",
       "permanent": true
     },
     {

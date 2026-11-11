@@ -9,7 +9,7 @@ export function GET() {
   const srcs = Object.values(sources)
     .map((s) => `- [${s.name}](${s.url}) by ${s.by}, ${s.license}`)
     .join('\n');
-  const body = `# mytemplate.my
+  const body = `# fillprompt.com
 
 > A free library of ${fmt(total)} ready-to-copy AI prompts: ${fmt(images.length)} image prompts, ${fmt(videos.length)} video prompts and ${fmt(texts.length)} text prompts, plus ${skills.length + communitySkills.length} agent skills. No account, no ads, no paywall. Every prompt names its original author and links to its source.
 

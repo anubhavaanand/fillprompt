@@ -1,8 +1,8 @@
-# mytemplate.my
+# fillprompt.com
 
 A free library of ready-to-copy AI prompts: image prompts, video prompts and text prompts, each shown with the result it produced, plus a directory of skills for AI agents. No account, no ads, no paywall.
 
-Live site: https://mytemplate.my
+Live site: https://fillprompt.com
 
 Every prompt comes from an open-source collection, names its original author and links to its source. Prompts with placeholders such as `[OBJECT]` get input fields, so a visitor fills in the blanks and copies the finished prompt.
 
@@ -90,4 +90,4 @@ The "prompts copied" numbers come from two Supabase database functions, `mt_copy
 
 ## Content removal
 
-If you own a prompt or image shown on the site and want it removed, see https://mytemplate.my/credits#removal.
+If you own a prompt or image shown on the site and want it removed, see https://fillprompt.com/credits#removal.

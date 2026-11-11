@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 /*
-  Brand: mytemplate.my
+  Brand: fillprompt.com
   Idea: a template is a blank waiting to be filled — [ ] with a highlighter mark.
   Palette: paper, ink, one highlighter yellow. Vermilion only for tiny signals.
   Shapes: square corners, ink rules, no soft shadows, no gradients.
@@ -152,9 +152,59 @@ mark {
   .tile-img {
     @apply relative block border border-ink/15 bg-line/50 transition-[transform,box-shadow] duration-150;
   }
-  .tile:hover .tile-img {
+  .tile:hover .tile-img,
+  .hero-tile.is-live .tile-img {
     transform: translate(-3px, -3px);
     box-shadow: 6px 6px 0 var(--color-mark), 6px 6px 0 1px var(--color-ink);
+  }
+  .hero-tile .tile-img {
+    transition-duration: 300ms;
+  }
+  /* Hero sheet: two stacked layers; the incoming one wipes up from the bottom and settles from a slight zoom. */
+  .hero-layer {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    clip-path: inset(100% 0 0 0);
+    transform: scale(1.12);
+    transition:
+      clip-path 750ms cubic-bezier(0.7, 0, 0.2, 1),
+      transform 1600ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .hero-layer.is-front {
+    z-index: 1;
+    clip-path: inset(0 0 0 0);
+    transform: scale(1);
+  }
+  .hero-layer.is-under {
+    clip-path: inset(0 0 0 0);
+    transform: scale(1);
+    transition: none;
+  }
+  .hero-bar {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 100%;
+    background: var(--color-mark);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  .hero-tile.is-running .hero-bar {
+    animation: hero-bar 9600ms linear forwards;
+  }
+  @keyframes hero-bar {
+    to {
+      transform: scaleX(1);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-layer {
+      transition: none;
+    }
   }
   /* ruled rows used for text prompts, categories and skills */
   .row {
