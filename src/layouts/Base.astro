@@ -1,7 +1,6 @@
 ---
 import '../styles/global.css';
 import Logo from '../components/Logo.astro';
-import Analytics from '@vercel/analytics/astro';
 import { ui, href, barePath, type Lang } from '../i18n';
 import { SITE, url } from '../lib/seo';
 
@@ -129,8 +128,6 @@ const isOn = (p: string) =>
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="sitemap" href="/sitemap.xml" />
     <link rel="help" type="text/plain" href="/llms.txt" title="llms.txt" />
-    {/* Vercel Web Analytics: cookieless page-view counts, served first-party by Vercel. */}
-    <Analytics />
     {!noindex && ld.map((json) => <script type="application/ld+json" set:html={json} />)}
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
