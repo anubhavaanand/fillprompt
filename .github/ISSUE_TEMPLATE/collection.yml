@@ -1,0 +1,35 @@
+name: Suggest a prompt collection
+description: An open-source prompt collection that could be added to the site.
+labels: [source]
+body:
+  - type: input
+    id: repo
+    attributes:
+      label: Collection URL
+      placeholder: https://github.com/owner/repo
+    validations:
+      required: true
+  - type: input
+    id: license
+    attributes:
+      label: License
+      description: The collection must allow redistribution, for example CC0, CC BY or MIT.
+      placeholder: CC BY 4.0
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Kind of prompts
+      multiple: true
+      options:
+        - Image
+        - Video (with the clip it produced)
+        - Text
+        - Agent skills
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else

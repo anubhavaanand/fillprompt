@@ -90,4 +90,16 @@ The "prompts copied" numbers come from two Supabase database functions, `mt_copy
 
 ## Content removal
 
-If you own a prompt or image shown on the site and want it removed, see https://fillprompt.com/credits#removal.
+If you own a prompt or image shown on the site and want it removed, see https://fillprompt.com/credits#removal or open a [content removal issue](../../issues/new?template=content-removal.yml).
+
+## Contributing
+
+Bug reports, fixes and suggestions for new open-source prompt collections are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md). Everyone taking part is expected to follow the [code of conduct](CODE_OF_CONDUCT.md). To report a security problem privately, see [SECURITY.md](SECURITY.md).
+
+## Support
+
+fillprompt.com is free and run by one person. If it saves you time, you can support it on [Ko-fi](https://ko-fi.com/mwrazzuwan) or through the [donate page](https://fillprompt.com/donate). Support never changes which prompts are shown or how they are ranked.
+
+## License
+
+The source code is released under the [MIT License](LICENSE). The prompt data in `src/data/` keeps the license of the collection it came from (see [Content sources](#content-sources)). The fillprompt name, logo and brand files are not licensed for reuse.
