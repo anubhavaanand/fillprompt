@@ -27,6 +27,7 @@ const cfg = {
     <input id="q" type="search" autofocus placeholder={t.searchHint} aria-label={t.searchPrompts} class="field mt-6 max-w-2xl text-lg" />
     <p class="mt-2 text-sm text-muted">{s.hint}</p>
     <p id="status" class="mt-6 font-mono text-sm text-muted">{s.loading}</p>
+    <div id="suggest" class="mt-4 flex flex-wrap gap-2"></div>
 
     <section id="sec-i" class="hidden pt-6">
       <div class="sec">
@@ -64,6 +65,7 @@ const cfg = {
       $('status').textContent = cfg.loadFailed;
       return;
     }
+    const suggest = $('suggest');
     const el = (tag, cls, text) => {
       const e = document.createElement(tag);
       if (cls) e.className = cls;
@@ -127,7 +129,48 @@ const cfg = {
       const im = idx.i.filter((r) => hit((r[0] + ' ' + (cfg.cats[r[2]] || '') + ' ' + r[4]).toLowerCase()));
       const vd = (idx.v || []).filter((r) => hit((r[0] + ' ' + r[2] + ' ' + r[4]).toLowerCase()));
       const tx = idx.t.filter((r) => hit(r[0].toLowerCase()));
-      $('status').textContent = im.length + vd.length + tx.length ? '' : cfg.none + ' "' + input.value.trim() + '".';
+      const total = im.length + vd.length + tx.length;
+      $('status').textContent = total ? '' : cfg.none + ' "' + input.value.trim() + '".';
+      suggest.replaceChildren();
+      if (!total) {
+        const label = document.createElement('span');
+        label.className = 'text-xs text-muted uppercase tracking-[0.1em]';
+        label.textContent = cfg.suggest;
+        suggest.appendChild(label);
+        const seen = new Set();
+        const add = (text) => {
+          if (!text || seen.has(text)) return;
+          seen.add(text);
+          const chip = document.createElement('button');
+          chip.type = 'button';
+          chip.className = 'label border border-ink bg-surface px-2.5 py-1 rounded text-sm hover:bg-mark transition-colors';
+          chip.textContent = text;
+          chip.addEventListener('click', () => {
+            input.value = text;
+            input.dispatchEvent(new Event('input'));
+          });
+          suggest.appendChild(chip);
+        };
+        // Image categories.
+        for (const r of idx.i) {
+          const cat = cfg.cats[r[2]] || r[2];
+          if (cat && !seen.has(cat)) add(cat);
+        }
+        // Video models.
+        for (const r of (idx.v || [])) {
+          if (r[2]) add(r[2]);
+        }
+        // Same search without the last word, if it finds results.
+        if (words.length > 1) {
+          const shorter = words.slice(0, -1).join(' ');
+          const hitShort = (s) => words.slice(0, -1).every((w) => s.includes(w));
+          const shorterTotal =
+            idx.i.filter((r) => hitShort((r[0] + ' ' + (cfg.cats[r[2]] || '') + ' ' + r[4]).toLowerCase())).length +
+            (idx.v || []).filter((r) => hitShort((r[0] + ' ' + r[2] + ' ' + r[4]).toLowerCase())).length +
+            idx.t.filter((r) => hitShort(r[0].toLowerCase())).length;
+          if (shorterTotal > 0) add(shorter);
+        }
+      }
       const show = (key, list, card) => {
         $('sec-' + key).classList.toggle('hidden', !list.length);
         $('n-' + key).textContent = list.length > MAX ? `${MAX} / ${list.length}` : String(list.length);

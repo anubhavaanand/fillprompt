@@ -258,6 +258,7 @@ const en = {
     loadFailed: 'The search index failed to load. Try reloading the page.',
     start: 'Type a keyword to start searching.',
     none: 'No results for',
+    suggest: 'Try:',
     images: 'Image prompts',
     videos: 'Video prompts',
     text: 'Text prompts',
