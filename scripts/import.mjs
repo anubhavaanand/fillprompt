@@ -276,7 +276,10 @@ function titleFromPrompt(prompt, fallback) {
     .map((l) => l.trim())
     .find((l) => /[a-zA-Z]{4}/.test(l) && !/^[{[\]}"]/.test(l));
   if (!line) return fallback;
-  let t = line.replace(/^[#>*\-\s]+/, '').replace(/[*_`]/g, '');
+  let t = line
+    .replace(/\{argument name="[^"]*" default="([^"]*)"\}/g, '$1') // template slots read as their default
+    .replace(/^[#>*\-\s]+/, '')
+    .replace(/[*_`]/g, '');
   const stop = t.search(/[.!?:;](\s|$)/);
   if (stop > 20) t = t.slice(0, stop);
   if (t.length > 72) t = t.slice(0, 72).replace(/\s+\S*$/, '') + '…';

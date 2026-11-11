@@ -171,6 +171,14 @@ const en = {
     viewSource: 'View in the original collection ↗',
     forDevs: 'For developers',
     typeMetaTitle: (label: string) => `${label} AI text prompts`,
+    // Search titles and descriptions for each type page; falls back to typeMetaTitle.
+    typeMeta: {
+      text: ['Plain-text AI prompts', (c: number) => `${n(c)} free plain-text prompts for ChatGPT, Claude, Gemini and other chat models, ready to copy.`],
+      structured: ['Structured AI prompts in JSON and YAML', (c: number) => `${n(c)} free structured prompts written as JSON, YAML or templates, for consistent AI output.`],
+      image: ['Text prompts for AI image generators', (c: number) => `${n(c)} free written prompts to paste into ChatGPT, Gemini or another image generator.`],
+      agent: ['AI agent and subagent prompts', (c: number) => `${n(c)} free system prompts for AI agents and subagents in Claude Code, Gemini CLI and other agent tools.`],
+      developer: ['AI prompts for developers', (c: number) => `${n(c)} free prompts for coding, debugging, code review and other developer work.`],
+    } as Record<string, [string, (c: number) => string]>,
     typeLead: (c: number, label: string) => `${n(c)} prompts in ${label}.`,
     crumbType: 'type',
   },

@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import PromptBox from '../components/PromptBox.astro';
-import { sources, textModels, excerpt, type TextPrompt } from '../lib/data';
+import { sources, textModels, excerpt, metaDescOf, type TextPrompt } from '../lib/data';
 import { ui, href, type Lang } from '../i18n';
 import { clip, textPromptSchema } from '../lib/seo';
 
@@ -22,7 +22,7 @@ const typeLabel = tt.types[x.type] ?? x.type;
 <Base
   lang={lang}
   title={tt.detailMeta(clip(x.title, 52))}
-  description={x.desc ? excerpt(x.desc, 155) : excerpt(x.prompt, 155)}
+  description={metaDescOf(x)}
   crumbs={[[tt.title, '/text'], [x.title, `/text-prompt/${x.slug}`]]}
   schema={[textPromptSchema(lang, x, src)]}
 >

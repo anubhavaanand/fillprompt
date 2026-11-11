@@ -21,8 +21,13 @@ const typeLabel = (f: string) => (f === 'developer' ? tt.forDevs : (tt.types[f] 
 const current = textModels.find((m) => m.slug === model);
 const label = current ? current.label : type ? typeLabel(type) : '';
 const suffix = page.currentPage > 1 ? `, ${t.page(page.currentPage)}` : '';
-const title = (current ? tt.modelMetaTitle(current.label) : type ? tt.typeMetaTitle(label) : tt.metaTitle) + suffix;
-const description = current ? tt.modelMetaDesc(current.count, current.label) : tt.metaDesc(texts.length);
+const typeMeta = type ? tt.typeMeta[type] : undefined;
+const title = (current ? tt.modelMetaTitle(current.label) : type ? (typeMeta?.[0] ?? tt.typeMetaTitle(label)) : tt.metaTitle) + suffix;
+const description = current
+  ? tt.modelMetaDesc(current.count, current.label)
+  : typeMeta
+    ? typeMeta[1](page.total)
+    : tt.metaDesc(texts.length);
 const lead = current ? tt.modelLead(current.count, current.label) : type ? tt.typeLead(page.total, label) : tt.lead(texts.length);
 const crumbs: [string, string][] = current
   ? [[tt.title, '/text'], [label, `/text-model/${current.slug}`]]

@@ -21,11 +21,14 @@ const image = Astro.props.image ?? new URL('/og.png', Astro.site).href;
 const t = ui[lang];
 const REPO_SLUG = 'haritel97/fillprompt';
 const REPO = `https://github.com/${REPO_SLUG}`;
-const description = Astro.props.description ?? t.siteDesc;
 // Long titles drop the site suffix so the page's own words fit in a search result.
 const fullTitle = title.includes('fillprompt') || title.length > 48 ? title : `${title} · fillprompt.com`;
 // No trailing slash: the host redirects /images/ to /images, and the canonical must name the final URL.
 const bare = barePath(Astro.url.pathname).replace(/(.)\/+$/, '$1');
+// Paginated list pages (/images/2, /category/x/3) get their page number in the description,
+// so no two pages share one.
+const pageNo = bare.match(/\/(\d+)$/)?.[1];
+const description = (Astro.props.description ?? t.siteDesc) + (pageNo ? ` Page ${pageNo}.` : '');
 const abs = (l: Lang) => new URL(href(l, bare), Astro.site);
 const nav = [
   ['/images', t.nav.images],

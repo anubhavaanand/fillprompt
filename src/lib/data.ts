@@ -108,9 +108,48 @@ export const textFilterCounts: Record<string, number> = Object.fromEntries(
   TEXT_FILTERS.map((f) => [f, texts.filter((t) => inTextFilter(t, f)).length]),
 );
 
+/** Readable text from a prompt written as JSON: its string values, joined. Plain prompts pass through. */
+const proseOf = (s: string) => {
+  const t = s.trim();
+  if (!/^[[{]/.test(t)) return s;
+  try {
+    const out: string[] = [];
+    const walk = (v: unknown) => {
+      if (typeof v === 'string') out.push(v);
+      else if (Array.isArray(v)) v.forEach(walk);
+      else if (v && typeof v === 'object') Object.values(v).forEach(walk);
+    };
+    walk(JSON.parse(t));
+    // Skip short enum-like values ("16:9", "cinematic") at the start; keep the descriptive sentences.
+    const prose = out.filter((x) => x.includes(' ')).join('. ');
+    return prose || out.join(', ');
+  } catch {
+    // Not valid JSON: strip the punctuation so at least the words read cleanly.
+    return t.replace(/["{}[\]]/g, ' ').replace(/\s*[:,]\s*/g, ', ').replace(/^,\s*/, '');
+  }
+};
+
+/** Short plain-text summary for meta descriptions and cards. */
 export const excerpt = (s: string, n = 140) => {
-  const t = s.replace(/\s+/g, ' ').trim();
+  const t = proseOf(s)
+    .replace(/\{argument name="[^"]*" default="([^"]*)"\}/g, '$1') // template slots read as their default
+    .replace(/[*#`>|_]{1,}/g, ' ') // Markdown marks
+    .replace(/(^|\s)-\s+/g, '$1') // list dashes
+    .replace(/\s+/g, ' ')
+    .replace(/(\.\s*){2,}/g, '. ')
+    .trim();
   return t.length > n ? t.slice(0, n).replace(/\s+\S*$/, '') + '…' : t;
+};
+
+/**
+ * Meta description for a prompt page: the source's own summary when it has one, otherwise the
+ * title followed by the start of the prompt, so near-identical prompts still read differently.
+ */
+export const metaDescOf = (x: { title: string; desc?: string; prompt: string }, n = 155) => {
+  if (x.desc) return excerpt(x.desc, n);
+  const body = excerpt(x.prompt, n);
+  if (body.toLowerCase().startsWith(x.title.toLowerCase().slice(0, 24))) return body;
+  return `${x.title}: ${excerpt(x.prompt, Math.max(60, n - x.title.length - 2))}`;
 };
 
 export const fmt = (n: number) => n.toLocaleString('en-US');

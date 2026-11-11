@@ -45,6 +45,136 @@
       "source": "/ms/:path*",
       "destination": "/:path*",
       "permanent": true
+    },
+    {
+      "source": "/prompt/generate-a-set-of-icons-for-argument-name-device-default-vin-f160",
+      "destination": "/prompt/generate-a-set-of-icons-for-vintage-electronic-equipment-in-f160",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/create-argument-name-items-default-fan-goods-for-a-standard-f155",
+      "destination": "/prompt/create-fan-goods-for-a-standard-vtuber-in-live-action-f155",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/a-argument-name-platform-default-taobao-product-detail-page-f148",
+      "destination": "/prompt/a-taobao-product-detail-page-for-t-800-robot-displaying-f148",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/a-argument-name-platform-default-taobao-product-detail-page-f147",
+      "destination": "/prompt/a-taobao-product-detail-page-for-t-800-robot-displaying-f147",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/a-argument-name-platform-default-taobao-product-detail-page-f146",
+      "destination": "/prompt/a-taobao-product-detail-page-for-t-800-robot-displaying-f146",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/a-argument-name-platform-default-taobao-product-detail-page-f145",
+      "destination": "/prompt/a-taobao-product-detail-page-for-t-800-robot-displaying-f145",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/a-dynamic-anime-illustration-of-a-girl-with-spiky-argument-n-f120",
+      "destination": "/prompt/a-dynamic-anime-illustration-of-a-girl-with-spiky-blonde-hai-f120",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/a-youtube-thumbnail-style-collage-for-a-argument-name-overal-f111",
+      "destination": "/prompt/a-youtube-thumbnail-style-collage-for-a-dark-dramatic-true-c-f111",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/thumbnail-for-a-youtube-unboxing-video-a-video-of-argument-f110",
+      "destination": "/prompt/thumbnail-for-a-youtube-unboxing-video-a-video-of-opening-al-f110",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/search-the-web-for-argument-name-performance-description-f102",
+      "destination": "/prompt/search-the-web-for-this-week-s-standout-individual-performan-f102",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/create-a-high-quality-japanese-argument-name-thumbnail-type-f97",
+      "destination": "/prompt/create-a-high-quality-japanese-webinar-thumbnail-f97",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/generate-avatars-of-various-emperors-from-the-argument-name-f44",
+      "destination": "/prompt/generate-avatars-of-various-emperors-from-the-ming-dynasty-b-f44",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/express-argument-name-subject-default-a-powerful-ai-builder-f42",
+      "destination": "/prompt/express-a-powerful-ai-builder-in-a-graffiti-sketch-style-pre-f42",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/create-argument-name-quantity-default-24-line-stickers-of-f40",
+      "destination": "/prompt/create-24-line-stickers-of-animals-in-a-quirky-hand-drawn-st-f40",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/create-argument-name-quantity-default-24-line-stickers-of-f39",
+      "destination": "/prompt/create-24-line-stickers-of-animals-in-a-quirky-hand-drawn-st-f39",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/create-argument-name-quantity-default-24-line-stickers-of-f38",
+      "destination": "/prompt/create-24-line-stickers-of-animals-in-a-quirky-hand-drawn-st-f38",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/create-argument-name-quantity-default-24-line-stickers-of-f37",
+      "destination": "/prompt/create-24-line-stickers-of-animals-in-a-quirky-hand-drawn-st-f37",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/a-argument-name-photography-style-default-photorealistic-por-f35",
+      "destination": "/prompt/a-photorealistic-portrait-with-shallow-depth-of-field-and-so-f35",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/a-3d-render-of-a-cute-kawaii-argument-name-subject-default-c-f33",
+      "destination": "/prompt/a-3d-render-of-a-cute-kawaii-cloud-character-on-a-pure-white-f33",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/express-argument-name-subject-default-a-powerful-ai-builder-f30",
+      "destination": "/prompt/express-a-powerful-ai-builder-in-a-graffiti-sketch-style-pre-f30",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/using-reference0-transform-the-subject-s-appearance-to-a-arg-f29",
+      "destination": "/prompt/using-reference0-transform-the-subject-s-appearance-to-a-tra-f29",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/create-a-minecraft-skin-inspired-by-argument-name-reference-f25",
+      "destination": "/prompt/create-a-minecraft-skin-inspired-by-my-look-f25",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/genshin-impact-argument-name-character-default-raiden-shogun-f24",
+      "destination": "/prompt/genshin-impact-raiden-shogun-cosplay-selfies-at-the-shanghai-f24",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/an-anime-style-illustration-of-a-argument-name-action-type-f22",
+      "destination": "/prompt/an-anime-style-illustration-of-a-high-impact-martial-arts-ba-f22",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/create-an-explanatory-slide-argument-name-format-default-pon-f20",
+      "destination": "/prompt/create-an-explanatory-slide-ponchi-e-diagram-for-momotaro-th-f20",
+      "permanent": true
+    },
+    {
+      "source": "/prompt/create-an-explanatory-slide-argument-name-format-default-pon-f19",
+      "destination": "/prompt/create-an-explanatory-slide-ponchi-e-diagram-for-momotaro-th-f19",
+      "permanent": true
     }
   ],
   "headers": [

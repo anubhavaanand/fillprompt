@@ -2,7 +2,7 @@
 import Base from '../layouts/Base.astro';
 import VideoCard from '../components/VideoCard.astro';
 import PromptBox from '../components/PromptBox.astro';
-import { sources, excerpt, fmt, type VideoPrompt } from '../lib/data';
+import { sources, excerpt, metaDescOf, fmt, type VideoPrompt } from '../lib/data';
 import { ui, href, type Lang } from '../i18n';
 import { clip, videoPromptSchema } from '../lib/seo';
 
@@ -21,7 +21,7 @@ const src = sources[v.source];
 <Base
   lang={lang}
   title={tv.detailMeta(clip(v.title, 52), v.model)}
-  description={v.desc ? excerpt(v.desc, 155) : excerpt(v.prompt, 155)}
+  description={metaDescOf(v)}
   image={v.poster || undefined}
   crumbs={[[tv.title, '/videos'], [v.title, `/video/${v.slug}`]]}
   schema={[videoPromptSchema(lang, v, src)]}
