@@ -4,7 +4,7 @@
     "by": "heygen-com",
     "description": "Write HTML. Render video. Built for agents.",
     "license": "Apache-2.0",
-    "stars": 82517,
+    "stars": 82521,
     "topic": "motion",
     "url": "https://github.com/heygen-com/hyperframes"
   },
@@ -13,7 +13,7 @@
     "by": "coreyhaines31",
     "description": "Marketing skills for Claude Code and AI agents. CRO, copywriting, SEO, analytics, and growth engineering.",
     "license": "MIT",
-    "stars": 59665,
+    "stars": 59667,
     "topic": "more",
     "url": "https://github.com/coreyhaines31/marketingskills"
   },
@@ -22,7 +22,7 @@
     "by": "K-Dense-AI",
     "description": "Turn any AI agent into an AI Scientist. The #1 Agent Skills library for science, used by 250,000+ scientists worldwide. 177 ready-to-use validated skills plus 100+ scientific databases covering biology, chemistry, medicine, and drug discovery. Compatible with Cursor, Claude Code, Codex, Pi, Antigravity, and the open Agent Skills standard.",
     "license": "MIT",
-    "stars": 56800,
+    "stars": 56801,
     "topic": "more",
     "url": "https://github.com/K-Dense-AI/scientific-agent-skills"
   },
@@ -31,7 +31,7 @@
     "by": "Nutlope",
     "description": "Anti-AI-slop design skill for Claude Code, Cursor, and Codex.",
     "license": "MIT",
-    "stars": 52990,
+    "stars": 52995,
     "topic": "design",
     "url": "https://github.com/Nutlope/hallmark"
   },
@@ -63,11 +63,20 @@
     "url": "https://github.com/VoltAgent/awesome-agent-skills"
   },
   {
+    "name": "mcp-for-blender",
+    "by": "ahujasid",
+    "description": "Community plugin to control Blender 3D with any LLM of your choice. Not affiliated with the official Blender Foundation.",
+    "license": "MIT",
+    "stars": 33974,
+    "topic": "motion",
+    "url": "https://github.com/ahujasid/mcp-for-blender"
+  },
+  {
     "name": "video-shotcraft",
     "by": "Vincentwei1021",
     "description": "AI video skill for Claude Code & Codex — cinematic, editable product promos with Remotion: 124 shot recipe cards, 150 motion previews, beat sync, sound design, Motion Workbench & JianYing (CapCut CN) export.",
     "license": "Apache-2.0",
-    "stars": 18617,
+    "stars": 18619,
     "topic": "motion",
     "url": "https://github.com/Vincentwei1021/video-shotcraft"
   },
@@ -94,7 +103,7 @@
     "by": "gamedev-skills",
     "description": "77 game-dev skills for AI coding agents — Godot, Unity, Unreal, Phaser, PixiJS, three.js, Bevy, pygame, LÖVE, Roblox. Portable SKILL.md Agent Skills (the format Anthropic launched as Claude Skills), with a router that loads the right skill for your engine and task. Runs in Claude Code, Cursor, Kiro, Codex, Copilot, Gemini CLI and more.",
     "license": "Apache-2.0",
-    "stars": 8285,
+    "stars": 8287,
     "topic": "more",
     "url": "https://github.com/gamedev-skills/awesome-gamedev-agent-skills"
   },
@@ -103,9 +112,18 @@
     "by": "dexhunter",
     "description": "skill to create best prompts for generating videos with seedance2.0",
     "license": "MIT",
-    "stars": 4454,
+    "stars": 4455,
     "topic": "motion",
     "url": "https://github.com/dexhunter/seedance2-skill"
+  },
+  {
+    "name": "davinci-resolve-mcp",
+    "by": "samuelgursky",
+    "description": "MCP server integration for DaVinci Resolve Studio",
+    "license": "MIT",
+    "stars": 4047,
+    "topic": "motion",
+    "url": "https://github.com/samuelgursky/davinci-resolve-mcp"
   },
   {
     "name": "ux-ui-agent-skills",
@@ -130,7 +148,7 @@
     "by": "mromidev",
     "description": "Free Claude skill: viral animated story shorts (2D characters in a 3D world) with three.js + Remotion",
     "license": "MIT",
-    "stars": 2850,
+    "stars": 2852,
     "topic": "motion",
     "url": "https://github.com/mromidev/claude-animated-shorts"
   },
@@ -216,6 +234,15 @@
     "url": "https://github.com/Dakkshin/after-effects-mcp"
   },
   {
+    "name": "Adobe_Premiere_Pro_MCP",
+    "by": "hetpatel-11",
+    "description": "Adobe Premiere Pro MCP. Tools for AI-driven video editing via MCP, for Codex, Claude, and other MCP clients.",
+    "license": "MIT",
+    "stars": 849,
+    "topic": "motion",
+    "url": "https://github.com/hetpatel-11/Adobe_Premiere_Pro_MCP"
+  },
+  {
     "name": "claude-motion-design",
     "by": "howseen-ai",
     "description": "A Claude Code skill to make motion design videos in pure code: HTML + Playwright + ffmpeg. No After Effects, no Remotion license.",
@@ -234,6 +261,15 @@
     "url": "https://github.com/rossark0/rossark-motion-skill"
   },
   {
+    "name": "AI-Faceless-Video-Generator",
+    "by": "SamurAIGPT",
+    "description": "Generate a video script, voice and a talking face completely with AI",
+    "license": "MIT",
+    "stars": 535,
+    "topic": "motion",
+    "url": "https://github.com/SamurAIGPT/AI-Faceless-Video-Generator"
+  },
+  {
     "name": "ai-shortfilm-prompts",
     "by": "jnMetaCode",
     "description": "Claude Code Skill that turns any idea into a cinematic, model-ready video prompt — Sora · Kling · Veo · Seedance. 21 genre templates, 5-stage structure, eval-tested. Distilled from the AI short Hollywood director PJ Ace called \"one of the best short films I've seen in years.\"",
@@ -241,6 +277,33 @@
     "stars": 530,
     "topic": "motion",
     "url": "https://github.com/jnMetaCode/ai-shortfilm-prompts"
+  },
+  {
+    "name": "premiere-pro-mcp",
+    "by": "leancoderkavy",
+    "description": "Adobe Premiere Pro MCP — independent, local-first server for supported workflows. Connect Claude, Codex, or Cursor through a local CEP bridge.",
+    "license": "MIT",
+    "stars": 515,
+    "topic": "motion",
+    "url": "https://github.com/leancoderkavy/premiere-pro-mcp"
+  },
+  {
+    "name": "code-video-showcase",
+    "by": "Moessif",
+    "description": "A pure-code beat-synced showcase-video Agent Skill: HTML/Canvas/SVG/Three.js frame-by-frame + Python numpy/scipy score + FFmpeg. No generative models.",
+    "license": "MIT",
+    "stars": 404,
+    "topic": "motion",
+    "url": "https://github.com/Moessif/code-video-showcase"
+  },
+  {
+    "name": "Awesome-Blender-Seedance-Workflow-Usecases",
+    "by": "Evolink-AI",
+    "description": "Curated Blender + Seedance workflows for AI filmmaking: previs, camera control, Blender MCP, reference video, and agent-guided use cases.",
+    "license": "CC-BY-4.0",
+    "stars": 351,
+    "topic": "motion",
+    "url": "https://github.com/Evolink-AI/Awesome-Blender-Seedance-Workflow-Usecases"
   },
   {
     "name": "motion2code",
@@ -252,6 +315,15 @@
     "url": "https://github.com/lovisdotio/motion2code"
   },
   {
+    "name": "kinocut",
+    "by": "KyaniteLabs",
+    "description": "Guardrailed video editing MCP server for AI agents. FFmpeg, Hyperframes, repurposing tools, Python client, and CLI. Local, fast, free.",
+    "license": "Apache-2.0",
+    "stars": 264,
+    "topic": "motion",
+    "url": "https://github.com/KyaniteLabs/kinocut"
+  },
+  {
     "name": "manim-skill",
     "by": "Yusuke710",
     "description": "SKILL.md for creating animations with Manim.",
@@ -259,6 +331,15 @@
     "stars": 198,
     "topic": "motion",
     "url": "https://github.com/Yusuke710/manim-skill"
+  },
+  {
+    "name": "video-prompting-skill",
+    "by": "Square-Zero-Labs",
+    "description": "AI Agent Skill for Prompting Video Models",
+    "license": "Apache-2.0",
+    "stars": 190,
+    "topic": "motion",
+    "url": "https://github.com/Square-Zero-Labs/video-prompting-skill"
   },
   {
     "name": "cinematic-video-prompt-skill",
@@ -270,6 +351,42 @@
     "url": "https://github.com/Rylaispirit/cinematic-video-prompt-skill"
   },
   {
+    "name": "vibe-creating-skill",
+    "by": "Alisa0808",
+    "description": "Open-source, bilingual AI video-prompt skill — rewrite ideas into model-ready text-to-video prompts. A portable Agent Skill (Claude Code, Codex, OpenClaw, Hermes); generate via Atlas Cloud — Seedance 2.0, Kling, Veo, Hailuo, Wan, Vidu, Gemini Omni, Grok Imagine.",
+    "license": "MIT",
+    "stars": 162,
+    "topic": "motion",
+    "url": "https://github.com/Alisa0808/vibe-creating-skill"
+  },
+  {
+    "name": "ffmpeg-mcp",
+    "by": "video-creator",
+    "description": "Using ffmpeg command line to achieve an mcp server, can be very convenient, through the dialogue to achieve the local video search, tailoring, stitching, playback,clip, overlay, concat and other functions",
+    "license": "MIT",
+    "stars": 153,
+    "topic": "motion",
+    "url": "https://github.com/video-creator/ffmpeg-mcp"
+  },
+  {
+    "name": "video-agent-skills",
+    "by": "Melvynx",
+    "description": "Free Claude Code skills to script, research and edit short-form videos. Markdown only.",
+    "license": "MIT",
+    "stars": 147,
+    "topic": "motion",
+    "url": "https://github.com/Melvynx/video-agent-skills"
+  },
+  {
+    "name": "capcut-ai-editor",
+    "by": "mrbuslov",
+    "description": "AI Capcut MCP server for automated \"talking head\" video processing. Removes pauses, detects duplicate takes, adds subtitles — and exports to CapCut project.",
+    "license": "MIT",
+    "stars": 122,
+    "topic": "motion",
+    "url": "https://github.com/mrbuslov/capcut-ai-editor"
+  },
+  {
     "name": "awesome-motion-design-agent-skills",
     "by": "frankxai",
     "description": "Curated motion design agent skills: GSAP, Motion, Remotion, Lottie and Rive for web animation, programmatic video and motion QA. Installable in Claude Code, Codex, Copilot.",
@@ -279,6 +396,15 @@
     "url": "https://github.com/frankxai/awesome-motion-design-agent-skills"
   },
   {
+    "name": "fpv-immersive-video-prompting",
+    "by": "zhouwei713",
+    "description": "Route-first FPV AI video prompting skill for Seedance, Kling, Runway, Veo, GPT Image asset packs, numbered stops, and red-line path control.",
+    "license": "MIT",
+    "stars": 96,
+    "topic": "motion",
+    "url": "https://github.com/zhouwei713/fpv-immersive-video-prompting"
+  },
+  {
     "name": "web-animation-skills",
     "by": "iart-ai",
     "description": "Web animation skills for Claude Code — GSAP, SVG, Lottie, micro-interactions, page transitions, and 60fps performance, installed straight into your agent.",
@@ -286,6 +412,15 @@
     "stars": 88,
     "topic": "motion",
     "url": "https://github.com/iart-ai/web-animation-skills"
+  },
+  {
+    "name": "anymotion",
+    "by": "anymotion-agent",
+    "description": "Anymotion is an open source AI motion graphics agent that turns product stories into polished SaaS explainers. Give it your idea or website, and let AI handle the branding, storyboard, keyframing, and animations.",
+    "license": "MIT",
+    "stars": 85,
+    "topic": "motion",
+    "url": "https://github.com/anymotion-agent/anymotion"
   },
   {
     "name": "hyperframes-cinematic-caption",

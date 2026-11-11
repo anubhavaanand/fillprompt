@@ -31,6 +31,12 @@ const FILES = {
 
 // Community skill repositories shown on the Skills page as links. Name, description, license and
 // stars are read from the GitHub API; a repository is listed only if its license is one of OPEN.
+// Licenses GitHub cannot detect (it reports NOASSERTION), read from each repository's LICENSE file.
+const LICENSE_FIX = {
+  'Alisa0808/vibe-creating-skill': 'MIT',
+  'Evolink-AI/Awesome-Blender-Seedance-Workflow-Usecases': 'CC-BY-4.0',
+};
+
 const COMMUNITY = {
   motion: [
     'greensock/gsap-skills',
@@ -55,6 +61,22 @@ const COMMUNITY = {
     'Dakkshin/after-effects-mcp',
     'Yusuke710/manim-skill',
     'audrey-560/hyperframes-cinematic-caption',
+    // Video: editors and render tools driven through MCP, and video prompting skills.
+    'ahujasid/mcp-for-blender',
+    'samuelgursky/davinci-resolve-mcp',
+    'hetpatel-11/Adobe_Premiere_Pro_MCP',
+    'leancoderkavy/premiere-pro-mcp',
+    'SamurAIGPT/AI-Faceless-Video-Generator',
+    'Moessif/code-video-showcase',
+    'Evolink-AI/Awesome-Blender-Seedance-Workflow-Usecases',
+    'KyaniteLabs/kinocut',
+    'Square-Zero-Labs/video-prompting-skill',
+    'Alisa0808/vibe-creating-skill',
+    'video-creator/ffmpeg-mcp',
+    'Melvynx/video-agent-skills',
+    'mrbuslov/capcut-ai-editor',
+    'zhouwei713/fpv-immersive-video-prompting',
+    'anymotion-agent/anymotion',
   ],
   design: [
     'Nutlope/hallmark',
@@ -524,7 +546,11 @@ async function importCommunity() {
     const rows = [];
     for (const [topic, repos] of Object.entries(COMMUNITY)) {
       for (const repo of repos) {
-        const res = await fetch(`https://api.github.com/repos/${repo}`, { headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'prompt-gallery-import' } });
+        // Without a token GitHub allows 60 calls an hour; set GITHUB_TOKEN to lift that.
+        const auth = process.env.GITHUB_TOKEN ? { Authorization: `Bearer ${process.env.GITHUB_TOKEN}` } : {};
+        const res = await fetch(`https://api.github.com/repos/${repo}`, { headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'prompt-gallery-import', ...auth } });
+        // A rate limit would leave most repositories out, so stop rather than write a partial list.
+        if (res.status === 403 || res.status === 429) throw new Error(`GitHub rate limit at ${repo}; set GITHUB_TOKEN and run again`);
         if (!res.ok) {
           console.warn('skipped', repo, res.status);
           continue;
@@ -534,7 +560,7 @@ async function importCommunity() {
           name: r.name,
           by: r.owner.login,
           description: (r.description || '').replace(/\s+/g, ' ').trim(),
-          license: r.license?.spdx_id || '',
+          license: LICENSE_FIX[repo] || r.license?.spdx_id || '',
           stars: r.stargazers_count,
           topic,
           url: r.html_url,
