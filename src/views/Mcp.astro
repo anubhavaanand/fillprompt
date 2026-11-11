@@ -21,6 +21,9 @@ const setups: [string, string, string?][] = [
   [c.claudeApp, c.claudeAppNote],
   [c.cursor, c.cursorNote, JSON.stringify({ mcpServers: { fillprompt: { url: URL } } }, null, 2)],
   [c.vscode, c.vscodeNote, `code --add-mcp '{"name":"fillprompt","type":"http","url":"${URL}"}'`],
+  [c.windsurf, c.windsurfNote, JSON.stringify({ mcpServers: { fillprompt: { serverUrl: URL } } }, null, 2)],
+  [c.zed, c.zedNote, JSON.stringify({ context_servers: { fillprompt: { url: URL } } }, null, 2)],
+  [c.cline, c.clineNote, JSON.stringify({ mcpServers: { fillprompt: { type: 'streamableHttp', url: URL } } }, null, 2)],
   [c.chatgpt, c.chatgptNote],
   [c.other, c.otherNote, `npx -y mcp-remote ${URL}`],
 ];
