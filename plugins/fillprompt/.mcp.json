@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "fillprompt": {
+      "type": "http",
+      "url": "https://fillprompt.com/api/mcp"
+    }
+  }
+}

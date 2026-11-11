@@ -24,6 +24,7 @@ export const SITEMAPS: Record<string, () => Entry[]> = {
       ...textModels.flatMap((m) => paged(`/text-model/${m.slug}`, m.count, TEXT_PAGE)),
       ...TEXT_FILTERS.filter((f) => textFilterCounts[f]).flatMap((f) => paged(`/text-type/${f}`, textFilterCounts[f], TEXT_PAGE)),
       '/skills',
+      '/mcp',
       '/credits',
       '/donate',
     ].map((p) => [p, '']),

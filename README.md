@@ -6,6 +6,35 @@ Live site: https://fillprompt.com
 
 Every prompt comes from an open-source collection, names its original author and links to its source. Prompts with placeholders such as `[OBJECT]` get input fields, so a visitor fills in the blanks and copies the finished prompt.
 
+## Use it from your AI assistant (MCP)
+
+fillprompt runs a free, read-only remote MCP server, so Claude, Cursor, VS Code, ChatGPT and other MCP clients can search every prompt and fill one in for you. No account or API key.
+
+```
+https://fillprompt.com/api/mcp
+```
+
+**Claude Code**
+
+```bash
+claude mcp add --transport http fillprompt https://fillprompt.com/api/mcp
+```
+
+Or install the plugin, which adds the server plus a `fillprompt` skill:
+
+```
+/plugin marketplace add haritel97/fillprompt
+/plugin install fillprompt@fillprompt
+```
+
+**Cursor** (`~/.cursor/mcp.json`)
+
+```json
+{ "mcpServers": { "fillprompt": { "url": "https://fillprompt.com/api/mcp" } } }
+```
+
+Tools: `search_prompts`, `get_prompt` (full text, fill-in slots, samples and author credit) and `list_filters`. Setup for other clients: [fillprompt.com/mcp](https://fillprompt.com/mcp). The server lives in [`api/`](api) and the plugin in [`plugins/fillprompt`](plugins/fillprompt).
+
 ## Stack
 
 - [Astro](https://astro.build) static site, no server code

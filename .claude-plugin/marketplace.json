@@ -1,0 +1,14 @@
+{
+  "name": "fillprompt",
+  "owner": { "name": "haritel97", "url": "https://github.com/haritel97" },
+  "metadata": { "description": "Free AI prompts for images, video and text from fillprompt.com." },
+  "plugins": [
+    {
+      "name": "fillprompt",
+      "source": "./plugins/fillprompt",
+      "description": "Search 6,700+ free image, video and text prompts on fillprompt.com and fill them in for your task.",
+      "category": "productivity",
+      "homepage": "https://fillprompt.com/mcp"
+    }
+  ]
+}

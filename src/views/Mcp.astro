@@ -1,0 +1,118 @@
+---
+import Base from '../layouts/Base.astro';
+import { images, texts, videos, fmt } from '../lib/data';
+import { ui, type Lang } from '../i18n';
+import { SITE } from '../lib/seo';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const t = ui[lang];
+const m = t.mcp;
+const c = m.clients;
+const URL = `${SITE}/api/mcp`;
+const total = images.length + videos.length + texts.length;
+
+// One block per client: heading, a line of help, and the snippet to copy (if any).
+const setups: [string, string, string?][] = [
+  [c.claudeCode, c.claudeCodeNote, `claude mcp add --transport http fillprompt ${URL}`],
+  [c.plugin, c.pluginNote, `/plugin marketplace add haritel97/fillprompt\n/plugin install fillprompt@fillprompt`],
+  [c.claudeApp, c.claudeAppNote],
+  [c.cursor, c.cursorNote, JSON.stringify({ mcpServers: { fillprompt: { url: URL } } }, null, 2)],
+  [c.vscode, c.vscodeNote, `code --add-mcp '{"name":"fillprompt","type":"http","url":"${URL}"}'`],
+  [c.chatgpt, c.chatgptNote],
+  [c.other, c.otherNote, `npx -y mcp-remote ${URL}`],
+];
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: m.title,
+  description: m.metaDesc,
+  applicationCategory: 'DeveloperApplication',
+  operatingSystem: 'Any',
+  url: `${SITE}/mcp`,
+  offers: { '@type': 'Offer', price: '0', priceCurrency: 'USD' },
+  isAccessibleForFree: true,
+};
+---
+
+<Base lang={lang} title={m.metaTitle} description={m.metaDesc} crumbs={[[m.title, '/mcp']]} schema={[schema]}>
+  <div class="wrap max-w-4xl pt-10">
+    <p class="label">{m.label}</p>
+    <h1 class="display mt-2 text-4xl sm:text-6xl">{m.title}</h1>
+    <p class="mt-5 max-w-2xl text-lg leading-relaxed text-muted">{m.lead}</p>
+
+    <p class="label mt-8">{m.urlLabel}</p>
+    <div class="mt-2 flex max-w-2xl items-stretch">
+      <code class="min-w-0 flex-1 overflow-x-auto whitespace-nowrap border border-ink bg-surface px-3 py-2.5 font-mono text-sm">{URL}</code>
+      <button type="button" class="copy-code shrink-0 border border-l-0 border-ink bg-mark px-4 text-sm font-semibold" data-text={URL} data-copied={m.copied}>{m.copy}</button>
+    </div>
+    <p class="mt-3 font-mono text-xs text-muted">{fmt(total)} prompts · {fmt(images.length)} image · {fmt(videos.length)} video · {fmt(texts.length)} text</p>
+
+    <div class="sec mt-14">
+      <span class="label">01</span>
+      <h2>{m.setupTitle}</h2>
+    </div>
+    <div class="mt-4 border-t border-ink">
+      {
+        setups.map(([name, note, code]) => (
+          <section class="border-b border-line py-5">
+            <h3 class="font-semibold">{name}</h3>
+            <p class="mt-1 text-sm text-muted">{note}</p>
+            {code && (
+              <div class="relative mt-3">
+                <pre class="overflow-x-auto border border-ink bg-surface p-3 pr-20 font-mono text-[13px] leading-relaxed"><code>{code}</code></pre>
+                <button type="button" class="copy-code absolute right-2 top-2 border border-ink bg-paper px-2.5 py-1 text-xs font-semibold hover:bg-mark" data-text={code} data-copied={m.copied}>
+                  {m.copy}
+                </button>
+              </div>
+            )}
+          </section>
+        ))
+      }
+    </div>
+
+    <div class="sec mt-14">
+      <span class="label">02</span>
+      <h2>{m.toolsTitle}</h2>
+    </div>
+    <dl class="mt-4 border-t border-ink">
+      {
+        m.tools.map(([name, desc]) => (
+          <div class="grid gap-1 border-b border-line py-4 sm:grid-cols-[12rem_1fr] sm:gap-6">
+            <dt class="font-mono text-sm font-semibold">{name}</dt>
+            <dd class="text-sm leading-relaxed text-muted">{desc}</dd>
+          </div>
+        ))
+      }
+    </dl>
+    <p class="mt-4 max-w-2xl text-sm text-muted">{m.credit}</p>
+
+    <div class="sec mt-14">
+      <span class="label">03</span>
+      <h2>{m.tryTitle}</h2>
+    </div>
+    <ul class="mt-4 grid gap-3 sm:grid-cols-2">
+      {m.tries.map((q) => <li class="border border-ink bg-surface p-4 text-sm leading-relaxed">“{q}”</li>)}
+    </ul>
+
+    <p class="mt-12 text-sm text-muted">
+      {m.openSource} <a href="https://github.com/haritel97/fillprompt" target="_blank" rel="noopener" class="link font-semibold text-ink">{m.openSourceLink}</a>.
+    </p>
+  </div>
+
+  <script is:inline>
+    document.querySelectorAll('.copy-code').forEach((b) => {
+      const label = b.textContent;
+      b.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(b.dataset.text);
+          b.textContent = b.dataset.copied;
+          setTimeout(() => (b.textContent = label), 1500);
+        } catch {}
+      });
+    });
+  </script>
+</Base>

@@ -1,7 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { skills, communitySkills, sources, fmt } from '../lib/data';
-import { ui, type Lang } from '../i18n';
+import { ui, href, type Lang } from '../i18n';
 
 interface Props {
   lang: Lang;
@@ -25,6 +25,9 @@ const groups: [string, string, number][] = [
     <h1 class="display mt-2 text-4xl sm:text-6xl">{ts.title}</h1>
     <p class="mt-3 max-w-2xl text-muted">
       {ts.leadA}<code class="bg-mark/50 px-1 font-mono text-sm text-ink">SKILL.md</code>{ts.leadB}
+    </p>
+    <p class="mt-3 max-w-2xl text-sm">
+      {ts.mcpCallout} <a href={href(lang, '/mcp')} class="link font-semibold">{ts.mcpLink} →</a>
     </p>
 
     {/* Filter: group buttons plus a keyword box. Works on the rows already on the page. */}
