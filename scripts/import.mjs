@@ -49,6 +49,12 @@ const COMMUNITY = {
     'jnMetaCode/ai-shortfilm-prompts',
     'Rylaispirit/cinematic-video-prompt-skill',
     'frankxai/awesome-motion-design-agent-skills',
+    'heygen-com/hyperframes',
+    'digitalsamba/claude-code-video-toolkit',
+    'adithya-s-k/manim_skill',
+    'Dakkshin/after-effects-mcp',
+    'Yusuke710/manim-skill',
+    'audrey-560/hyperframes-cinematic-caption',
   ],
   design: [
     'Nutlope/hallmark',
